@@ -4,13 +4,13 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager
 #include <ArduinoJson.h>          // https://github.com/bblanchon/ArduinoJson
-#include <Adafruit_MQTT.h>
+#include <Adafruit_MQTT.h>        // https://github.com/adafruit/Adafruit_MQTT_Library
 #include <Adafruit_MQTT_Client.h>
 #include "SwayLight.h"
-
+#include "SwayLight_MQTT_topic.h"
 
 /************************* Adafruit.io Setup *********************************/
-#define AIO_SERVER "172.20.10.4"
+#define AIO_SERVER "192.168.0.102"
 #define AIO_SERVERPORT 1883 // use 1883 for SSL
 #define AIO_USERNAME ""
 #define AIO_KEY ""
@@ -34,8 +34,10 @@ char mqtt_ip[20] = "mqtt_ip";
 bool shouldSaveConfig = false;
 
 SoftwareSerial mySerial(13, 15);
+SwayLight s(mySerial);
 
 void MQTT_connect();
+void subscribeAllTopics();
 
 //callback notifying us of the need to save config
 void saveConfigCallback () {
@@ -45,7 +47,6 @@ void saveConfigCallback () {
 
 void setup() {
   Serial.begin(115200);
-  SwayLight s(mySerial);
   
   WiFiManagerParameter custom_mqtt_ip(mqtt_ip, mqtt_ip, AIO_SERVER, 15);
 
@@ -104,7 +105,7 @@ Adafruit_MQTT_Client mqtt(&client, mqtt_ip, AIO_SERVERPORT, AIO_USERNAME, AIO_KE
 
 // 必須follow topic規則，命名需以/feeds/作為開頭
 // Notice MQTT paths for AIO follow the form: /feeds/
-Adafruit_MQTT_Subscribe led = Adafruit_MQTT_Subscribe(&mqtt, "feeds/esp8266/slider");
+Adafruit_MQTT_Subscribe power = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC POWER);
 
 void loop() {
   // Ensure the connection to the MQTT server is alive (this will make the first
@@ -117,8 +118,15 @@ void loop() {
   
   Adafruit_MQTT_Subscribe *subscription;
   while ((subscription = mqtt.readSubscription(5000))) {
-    if(subscription == &led) {
-      Serial.println((char *)led.lastread);
+    if(subscription == &power) {
+      Serial.print((char *)power.topic);
+      Serial.print(": ");
+      Serial.println((char *)power.lastread);
+      if(*power.lastread == '1') {
+        s.setPower(true);
+      }else {
+        s.setPower(false);
+      }
     }
   }
   // ping the server to keep the mqtt connection alive
@@ -137,9 +145,9 @@ void MQTT_connect() {
   if (mqtt.connected()) {
     return;
   }
-  mqtt.subscribe(&led);
-  Serial.println("led subscribed!");
-
+  subscribeAllTopics();
+  Serial.println("All topics subscribed!");
+  
   Serial.print("Connecting to MQTT... ");
   Serial.println(mqtt.connectErrorString(ret));
   uint8_t retries = 5;
@@ -155,4 +163,8 @@ void MQTT_connect() {
     }
   }
   Serial.println("MQTT Connected!");
+}
+
+void subscribeAllTopics() {
+  mqtt.subscribe(&power);
 }
