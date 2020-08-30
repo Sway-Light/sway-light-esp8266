@@ -1,4 +1,5 @@
 #include "SwayLight.h"
+#include "SwayLight_MQTT_topic.h"
 #define DEBUG_FLAG 1
 
 SwayLight::SwayLight(SoftwareSerial& serial) {
@@ -18,7 +19,19 @@ void SwayLight::setPower(bool turnOn) {
 }
 
 void SwayLight::setPower(bool turnOn, int afterSeconds) {
-  
+  _initData();
+  if(turnOn) {
+    _setData(MODE_SWITCH, ON, afterSeconds);
+  }else {
+    _setData(MODE_SWITCH, OFF, afterSeconds);
+  }
+  _sendDataToHT32();
+}
+
+void SwayLight::setColor(byte controlMode, byte controlType, int rgba) {
+  _initData();
+  _setLedData(controlMode, controlType, rgba);
+  _sendDataToHT32();
 }
 
 void SwayLight::_initData() {
@@ -46,12 +59,20 @@ void SwayLight::_setData(byte controlType, byte switchMode) {
   _setCheckSum();
 }
 
-void SwayLight::_setData(byte controlType, byte ledControl, byte param) {
-  _dataToHT32[1] = controlType;
+void SwayLight::_setLedData(byte controlMode, byte ledControlType, byte param) {
+  _dataToHT32[1] = controlMode;
 }
 
-void SwayLight::_setData(byte controlType, byte ledControl, byte param, byte red, byte green, byte blue) {
-  _dataToHT32[1] = controlType;
+void SwayLight::_setLedData(byte controlMode, byte ledControlType, int rgba) {
+  //  brightness,level   R    G    B
+  //              [ 3] [ 4] [ 5] [ 6]
+  _dataToHT32[1] = controlMode;
+  _dataToHT32[2] = _LED::COLOR;
+  _dataToHT32[3] = (rgba      ) & 0xFF;
+  _dataToHT32[4] = (rgba >> 24) & 0xFF;
+  _dataToHT32[5] = (rgba >> 16) & 0xFF;
+  _dataToHT32[6] = (rgba >>  8) & 0xFF;
+  _setCheckSum();
 }
 
 void SwayLight::_setCheckSum() {

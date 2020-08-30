@@ -38,6 +38,7 @@ SwayLight s(mySerial);
 
 void MQTT_connect();
 void subscribeAllTopics();
+void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription);
 
 //callback notifying us of the need to save config
 void saveConfigCallback () {
@@ -105,7 +106,12 @@ Adafruit_MQTT_Client mqtt(&client, mqtt_ip, AIO_SERVERPORT, AIO_USERNAME, AIO_KE
 
 // 必須follow topic規則，命名需以/feeds/作為開頭
 // Notice MQTT paths for AIO follow the form: /feeds/
-Adafruit_MQTT_Subscribe power = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC POWER);
+Adafruit_MQTT_Subscribe power        = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC POWER);
+Adafruit_MQTT_Subscribe powerOnTime  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC ON_TIME);
+Adafruit_MQTT_Subscribe powerOffTime = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC OFF_TIME);
+
+Adafruit_MQTT_Subscribe lightColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR);
+Adafruit_MQTT_Subscribe musicColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_COLOR);
 
 void loop() {
   // Ensure the connection to the MQTT server is alive (this will make the first
@@ -118,15 +124,25 @@ void loop() {
   
   Adafruit_MQTT_Subscribe *subscription;
   while ((subscription = mqtt.readSubscription(5000))) {
+    printSubscribeInfo(subscription);
     if(subscription == &power) {
-      Serial.print((char *)power.topic);
-      Serial.print(": ");
-      Serial.println((char *)power.lastread);
-      if(*power.lastread == '1') {
+      if(*subscription->lastread == '1') {
         s.setPower(true);
       }else {
         s.setPower(false);
       }
+    }else if(subscription == &powerOnTime) {
+      s.setPower(true, atoi((char *)subscription->lastread));
+    }else if(subscription == &powerOffTime) {
+      s.setPower(false, atoi((char *)subscription->lastread));
+    }else if(subscription == &lightColor) {
+      int temp;
+      sscanf((char *)subscription->lastread,"%x", &temp);
+      s.setColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, temp);
+    }else if(subscription == &musicColor) {
+      int temp;
+      sscanf((char *)subscription->lastread,"%x", &temp);
+      s.setColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, temp);
     }
   }
   // ping the server to keep the mqtt connection alive
@@ -167,4 +183,14 @@ void MQTT_connect() {
 
 void subscribeAllTopics() {
   mqtt.subscribe(&power);
+  mqtt.subscribe(&powerOnTime);
+  mqtt.subscribe(&powerOffTime);
+  mqtt.subscribe(&lightColor);
+  mqtt.subscribe(&musicColor);
+}
+
+void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription) {
+  Serial.print((char *)subscription->topic);
+  Serial.print(": ");
+  Serial.println((char *)subscription->lastread);
 }

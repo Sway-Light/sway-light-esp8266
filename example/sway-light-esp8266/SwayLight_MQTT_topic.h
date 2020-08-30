@@ -10,8 +10,26 @@
 #define LIGHT_ZOOM            "mode/light/zoom"
 #define LIGHT_DISPLAY_OFFSET  "mode/light/display_offset"
 
-#define MUSIC_LEVEL_H_COLOR   "mode/music/color/high"
-#define MUSIC_LEVEL_M_COLOR   "mode/music/color/meduim"
-#define MUSIC_LEVEL_L_COLOR   "mode/music/color/low"
+#define MUSIC_COLOR   "mode/music/color"
 #define MUSIC_DISPLAY_OFFSET  "mode/music/display_offset"
 #define MUSIC_STYLE           "mode/music/style"
+
+enum _CONST_BYTE {
+  END_BYTE               = 0x87,
+  START_BYTE             = 0x95
+};
+enum _POWER {
+  OFF                    = 0x00,
+  ON                     = 0x01
+};
+enum _CONTROL_TYPE {
+  MODE_SWITCH            = 0x01,
+  LIGHT                  = 0x02,
+  MUSIC                  = 0x03
+};
+enum _LED {
+  COLOR                  = 0x01,
+  DISPLAY_OFFSET         = 0x02,
+  ZOOM                   = 0x03,
+  STYLE                  = 0x04
+};
