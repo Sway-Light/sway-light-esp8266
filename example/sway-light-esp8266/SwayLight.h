@@ -8,18 +8,18 @@ class SwayLight {
   public:
     SwayLight(SoftwareSerial& serial);
     void setPower(bool turnOn);
-    void setPower(bool turnOn, int afterSeconds);
-    void setColor(byte controlType, byte controlMode, int rgba);
+    void setPower(bool turnOn, uint32_t afterSeconds);
+    void setColor(uint8_t controlType, uint8_t controlMode, uint32_t rgba);
 
   private:
     SoftwareSerial *_mcuSerial;
-    byte _dataToHT32[CMD_SIZE];
+    uint8_t _dataToHT32[CMD_SIZE];
     void _initData(void);
     
-    void _setData(byte controlType, byte mode, int afterSeconds);
-    void _setData(byte controlType, byte switchMode);
-    void _setLedData(byte controlMode, byte ledControlType, byte param);
-    void _setLedData(byte controlMode, byte ledControlType, int rgba);
+    void _setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds);
+    void _setData(uint8_t controlType, uint8_t switchMode);
+    void _setLedData(uint8_t controlMode, uint8_t ledControlType, uint8_t param);
+    void _setLedData(uint8_t controlMode, uint8_t ledControlType, uint32_t rgba);
     void _setCheckSum(void);
     void _sendDataToHT32(void);
 };

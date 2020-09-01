@@ -18,7 +18,7 @@ void SwayLight::setPower(bool turnOn) {
   _sendDataToHT32();
 }
 
-void SwayLight::setPower(bool turnOn, int afterSeconds) {
+void SwayLight::setPower(bool turnOn, uint32_t afterSeconds) {
   _initData();
   if(turnOn) {
     _setData(MODE_SWITCH, ON, afterSeconds);
@@ -28,7 +28,7 @@ void SwayLight::setPower(bool turnOn, int afterSeconds) {
   _sendDataToHT32();
 }
 
-void SwayLight::setColor(byte controlMode, byte controlType, int rgba) {
+void SwayLight::setColor(uint8_t controlMode, uint8_t controlType, uint32_t rgba) {
   _initData();
   _setLedData(controlMode, controlType, rgba);
   _sendDataToHT32();
@@ -43,7 +43,7 @@ void SwayLight::_initData() {
 }
 
 // set data
-void SwayLight::_setData(byte controlType, byte mode, int afterSeconds) {
+void SwayLight::_setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds) {
   _dataToHT32[1] = controlType;
   _dataToHT32[2] = mode;
   _dataToHT32[3] = (afterSeconds >> 24) & 0xFF;
@@ -53,17 +53,17 @@ void SwayLight::_setData(byte controlType, byte mode, int afterSeconds) {
   _setCheckSum();
 }
 
-void SwayLight::_setData(byte controlType, byte switchMode) {
+void SwayLight::_setData(uint8_t controlType, uint8_t switchMode) {
   _dataToHT32[1] = controlType;
   _dataToHT32[2] = switchMode;
   _setCheckSum();
 }
 
-void SwayLight::_setLedData(byte controlMode, byte ledControlType, byte param) {
+void SwayLight::_setLedData(uint8_t controlMode, uint8_t ledControlType, uint8_t param) {
   _dataToHT32[1] = controlMode;
 }
 
-void SwayLight::_setLedData(byte controlMode, byte ledControlType, int rgba) {
+void SwayLight::_setLedData(uint8_t controlMode, uint8_t ledControlType, uint32_t rgba) {
   //  brightness,level   R    G    B
   //              [ 3] [ 4] [ 5] [ 6]
   _dataToHT32[1] = controlMode;
@@ -80,8 +80,8 @@ void SwayLight::_setCheckSum() {
   for(int i = 1; i <= 6; i++) {
     sum += _dataToHT32[i];
   }
-  _dataToHT32[7] = (byte)(sum >> 8);
-  _dataToHT32[8] = (byte)(sum & 0x00FF);
+  _dataToHT32[7] = (uint8_t)(sum >> 8);
+  _dataToHT32[8] = (uint8_t)(sum & 0x00FF);
 }
 
 void SwayLight::_sendDataToHT32(void) {
