@@ -148,19 +148,19 @@ void loop() {
       uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
       s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
     }else if (subscription == &lightOffset) {
-      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedOffset(_CONTROL_TYPE::LIGHT, offsetValue);
     }else if (subscription == &lightZoom) {
-      uint32_t zoomValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      uint32_t zoomValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedZoom(zoomValue);
     }else if (subscription == &musicColor) {
       uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
       s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
     }else if (subscription == &musicOffset) {
-      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedOffset(_CONTROL_TYPE::MUSIC, offsetValue);
     }else if (subscription == &musicStyle) {
-      uint32_t styleId = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      uint32_t styleId = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedStyle(styleId);
     }
   }
