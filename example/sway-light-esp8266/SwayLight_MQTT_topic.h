@@ -10,7 +10,7 @@
 #define LIGHT_ZOOM            "mode/light/zoom"
 #define LIGHT_DISPLAY_OFFSET  "mode/light/display_offset"
 
-#define MUSIC_COLOR   "mode/music/color"
+#define MUSIC_COLOR           "mode/music/color"
 #define MUSIC_DISPLAY_OFFSET  "mode/music/display_offset"
 #define MUSIC_STYLE           "mode/music/style"
 

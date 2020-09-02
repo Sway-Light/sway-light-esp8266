@@ -113,7 +113,12 @@ Adafruit_MQTT_Subscribe powerOffTime = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_
 Adafruit_MQTT_Subscribe currMode     = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC CURR_MODE);
 
 Adafruit_MQTT_Subscribe lightColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR);
+Adafruit_MQTT_Subscribe lightOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_DISPLAY_OFFSET);
+Adafruit_MQTT_Subscribe lightZoom    = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_ZOOM);
+
 Adafruit_MQTT_Subscribe musicColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_COLOR);
+Adafruit_MQTT_Subscribe musicOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY_OFFSET);
+Adafruit_MQTT_Subscribe musicStyle  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_STYLE);
 
 void loop() {
   // Ensure the connection to the MQTT server is alive (this will make the first
@@ -141,10 +146,22 @@ void loop() {
       s.setMode(mode);
     }else if (subscription == &lightColor) {
       uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
-      s.setColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
+      s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
+    }else if (subscription == &lightOffset) {
+      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      s.setLedOffset(_CONTROL_TYPE::LIGHT, offsetValue);
+    }else if (subscription == &lightZoom) {
+      uint32_t zoomValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      s.setLedZoom(zoomValue);
     }else if (subscription == &musicColor) {
       uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
-      s.setColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
+      s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
+    }else if (subscription == &musicOffset) {
+      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      s.setLedOffset(_CONTROL_TYPE::MUSIC, offsetValue);
+    }else if (subscription == &musicStyle) {
+      uint32_t styleId = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      s.setLedStyle(styleId);
     }
   }
   // ping the server to keep the mqtt connection alive
@@ -187,9 +204,16 @@ void subscribeAllTopics() {
   mqtt.subscribe(&power);
   mqtt.subscribe(&powerOnTime);
   mqtt.subscribe(&powerOffTime);
+
   mqtt.subscribe(&currMode);
+
   mqtt.subscribe(&lightColor);
+  mqtt.subscribe(&lightOffset);
+  mqtt.subscribe(&lightZoom);
+
   mqtt.subscribe(&musicColor);
+  mqtt.subscribe(&musicOffset);
+  mqtt.subscribe(&musicStyle);
 }
 
 void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription) {

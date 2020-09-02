@@ -26,13 +26,28 @@ void SwayLight::setPower(bool turnOn, uint32_t afterSeconds) {
   _sendDataToHT32();
 }
 
-void SwayLight::setColor(uint8_t controlMode, uint8_t controlType, uint32_t rgba) {
+void SwayLight::setMode(uint8_t mode) {
+  _setData(_CONTROL_TYPE::MODE_SWITCH, mode);
+  _sendDataToHT32();
+}
+
+void SwayLight::setLedColor(uint8_t controlMode, uint8_t controlType, uint32_t rgba) {
   _setLedData(controlMode, controlType, rgba);
   _sendDataToHT32();
 }
 
-void SwayLight::setMode(uint8_t mode) {
-  _setData(MODE_SWITCH, mode);
+void SwayLight::setLedOffset(uint8_t mode, uint8_t offsetValue) {
+  _setLedData(mode, _LED::DISPLAY_OFFSET, offsetValue);
+  _sendDataToHT32();
+}
+
+void SwayLight::setLedZoom(uint8_t zoomValue) {
+  _setLedData(_CONTROL_TYPE::LIGHT, _LED::ZOOM, zoomValue);
+  _sendDataToHT32();
+}
+
+void SwayLight::setLedStyle(uint8_t styleId) {
+  _setLedData(_CONTROL_TYPE::MUSIC, _LED::STYLE, styleId);
   _sendDataToHT32();
 }
 
@@ -66,6 +81,8 @@ void SwayLight::_setData(uint8_t controlType, uint8_t switchMode) {
 void SwayLight::_setLedData(uint8_t controlMode, uint8_t ledControlType, uint8_t param) {
   _initData();
   _dataToHT32[1] = controlMode;
+  _dataToHT32[2] = ledControlType;
+  _dataToHT32[3] = param;
   _setCheckSum();
 }
 

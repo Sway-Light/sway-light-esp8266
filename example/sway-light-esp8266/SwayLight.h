@@ -10,7 +10,10 @@ class SwayLight {
     void setPower(bool turnOn);
     void setPower(bool turnOn, uint32_t afterSeconds);
     void setMode(uint8_t mode);
-    void setColor(uint8_t controlType, uint8_t controlMode, uint32_t rgba);
+    void setLedColor(uint8_t controlType, uint8_t controlMode, uint32_t rgba);
+    void setLedOffset(uint8_t mode, uint8_t offsetValue);
+    void setLedZoom(uint8_t zoomValue);
+    void setLedStyle(uint8_t styleId);
 
   private:
     SoftwareSerial *_mcuSerial;
