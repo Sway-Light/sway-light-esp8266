@@ -1,0 +1,41 @@
+{
+    "configurations": [
+        {
+            "name": "Arduino Uno",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/Applications/Arduino.app/Contents/Java/tools/**",
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
+                "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include/**",
+                "~/Documents/Arduino/libraries/**"
+            ],
+            "forcedInclude": [
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h"
+            ],
+            "defines": [
+                "USBCON",
+                "ARDUINO=10809"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "Wemos D1 mini",
+            "includePath": [
+                "~/Library/Arduino15/packages/esp8266/tools/**",
+                "~/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.1/**",
+                "~/Documents/Arduino/libraries/**"
+            ],
+            "forcedInclude": [
+                "~/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.1/cores/esp8266/Arduino.h",
+                "~/Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.1/variants/d1_mini/pins_arduino.h"
+            ],
+            "defines": [
+                "USBCON",
+                "ARDUINO=10809"
+            ]
+        }
+    ],
+    "version": 4
+}

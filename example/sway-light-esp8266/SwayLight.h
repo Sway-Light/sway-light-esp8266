@@ -14,8 +14,8 @@ class SwayLight {
   private:
     SoftwareSerial *_mcuSerial;
     uint8_t _dataToHT32[CMD_SIZE];
-    void _initData(void);
     
+    void _initData(void);
     void _setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds);
     void _setData(uint8_t controlType, uint8_t switchMode);
     void _setLedData(uint8_t controlMode, uint8_t ledControlType, uint8_t param);

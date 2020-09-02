@@ -132,9 +132,9 @@ void loop() {
         s.setPower(false);
       }
     }else if(subscription == &powerOnTime) {
-      s.setPower(true, atoi((char *)subscription->lastread));
+      s.setPower(true, (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10)));
     }else if(subscription == &powerOffTime) {
-      s.setPower(false, atoi((char *)subscription->lastread));
+      s.setPower(false, (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10)));
     }else if(subscription == &lightColor) {
       int temp;
       sscanf((char *)subscription->lastread,"%x", &temp);
