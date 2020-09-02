@@ -110,6 +110,8 @@ Adafruit_MQTT_Subscribe power        = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_
 Adafruit_MQTT_Subscribe powerOnTime  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC ON_TIME);
 Adafruit_MQTT_Subscribe powerOffTime = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC OFF_TIME);
 
+Adafruit_MQTT_Subscribe currMode     = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC CURR_MODE);
+
 Adafruit_MQTT_Subscribe lightColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR);
 Adafruit_MQTT_Subscribe musicColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_COLOR);
 
@@ -126,32 +128,32 @@ void loop() {
   while ((subscription = mqtt.readSubscription(5000))) {
     printSubscribeInfo(subscription);
     if(subscription == &power) {
-      if(*subscription->lastread == '1') {
-        s.setPower(true);
-      }else {
-        s.setPower(false);
-      }
+      bool onoff = (bool)(strtoul((char *)subscription->lastread, NULL, 10));
+      s.setPower(onoff);
     }else if(subscription == &powerOnTime) {
-      s.setPower(true, (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10)));
+      uint32_t powerOnTime = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
+      s.setPower(true, powerOnTime);
     }else if(subscription == &powerOffTime) {
-      s.setPower(false, (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10)));
-    }else if(subscription == &lightColor) {
-      int temp;
-      sscanf((char *)subscription->lastread,"%x", &temp);
-      s.setColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, temp);
-    }else if(subscription == &musicColor) {
-      int temp;
-      sscanf((char *)subscription->lastread,"%x", &temp);
-      s.setColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, temp);
+      uint32_t powerOffTime = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
+      s.setPower(false, powerOffTime);
+    }else if(subscription == &currMode) {
+      uint8_t mode = (uint8_t)(strtoul((char *)subscription->lastread, NULL, 10));
+      s.setMode(mode);
+    }else if (subscription == &lightColor) {
+      uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      s.setColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
+    }else if (subscription == &musicColor) {
+      uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
+      s.setColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
     }
   }
   // ping the server to keep the mqtt connection alive
   // NOT required if you are publishing once every KEEPALIVE seconds
   
-  if(! mqtt.ping()) {
-    mqtt.disconnect();
-    Serial.println("MQTT Disconnected!");
-  }
+  // if(! mqtt.ping()) {
+  //   mqtt.disconnect();
+  //   Serial.println("MQTT Disconnected!");
+  // }
 }
 
 void MQTT_connect() {
@@ -185,6 +187,7 @@ void subscribeAllTopics() {
   mqtt.subscribe(&power);
   mqtt.subscribe(&powerOnTime);
   mqtt.subscribe(&powerOffTime);
+  mqtt.subscribe(&currMode);
   mqtt.subscribe(&lightColor);
   mqtt.subscribe(&musicColor);
 }

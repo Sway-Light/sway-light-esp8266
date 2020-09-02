@@ -3,7 +3,7 @@
 #define ON_TIME               "mode/onoff/on_time"
 #define OFF_TIME              "mode/onoff/off_time"
 
-#define STATUS                "status"
+#define CURR_MODE             "status"
 #define POWER                 "power"
 
 #define LIGHT_COLOR           "mode/light/color"

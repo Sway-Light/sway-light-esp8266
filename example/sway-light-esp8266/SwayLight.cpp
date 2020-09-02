@@ -9,7 +9,6 @@ SwayLight::SwayLight(SoftwareSerial& serial) {
 }
 
 void SwayLight::setPower(bool turnOn) {
-  _initData();
   if(turnOn) {
     _setData(MODE_SWITCH, ON);
   }else {
@@ -19,7 +18,6 @@ void SwayLight::setPower(bool turnOn) {
 }
 
 void SwayLight::setPower(bool turnOn, uint32_t afterSeconds) {
-  _initData();
   if(turnOn) {
     _setData(MODE_SWITCH, ON, afterSeconds);
   }else {
@@ -29,8 +27,12 @@ void SwayLight::setPower(bool turnOn, uint32_t afterSeconds) {
 }
 
 void SwayLight::setColor(uint8_t controlMode, uint8_t controlType, uint32_t rgba) {
-  _initData();
   _setLedData(controlMode, controlType, rgba);
+  _sendDataToHT32();
+}
+
+void SwayLight::setMode(uint8_t mode) {
+  _setData(MODE_SWITCH, mode);
   _sendDataToHT32();
 }
 
@@ -44,6 +46,7 @@ void SwayLight::_initData() {
 
 // set data
 void SwayLight::_setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds) {
+  _initData();
   _dataToHT32[1] = controlType;
   _dataToHT32[2] = mode;
   _dataToHT32[3] = (afterSeconds >> 24) & 0xFF;
@@ -54,18 +57,22 @@ void SwayLight::_setData(uint8_t controlType, uint8_t mode, uint32_t afterSecond
 }
 
 void SwayLight::_setData(uint8_t controlType, uint8_t switchMode) {
+  _initData();
   _dataToHT32[1] = controlType;
   _dataToHT32[2] = switchMode;
   _setCheckSum();
 }
 
 void SwayLight::_setLedData(uint8_t controlMode, uint8_t ledControlType, uint8_t param) {
+  _initData();
   _dataToHT32[1] = controlMode;
+  _setCheckSum();
 }
 
 void SwayLight::_setLedData(uint8_t controlMode, uint8_t ledControlType, uint32_t rgba) {
   //  brightness,level   R    G    B
   //              [ 3] [ 4] [ 5] [ 6]
+  _initData();
   _dataToHT32[1] = controlMode;
   _dataToHT32[2] = _LED::COLOR;
   _dataToHT32[3] = (rgba      ) & 0xFF;

@@ -9,6 +9,7 @@ class SwayLight {
     SwayLight(SoftwareSerial& serial);
     void setPower(bool turnOn);
     void setPower(bool turnOn, uint32_t afterSeconds);
+    void setMode(uint8_t mode);
     void setColor(uint8_t controlType, uint8_t controlMode, uint32_t rgba);
 
   private:
