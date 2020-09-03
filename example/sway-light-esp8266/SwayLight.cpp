@@ -8,6 +8,12 @@ SwayLight::SwayLight(SoftwareSerial& serial) {
 //  _mcuSerial->println("test msg");
 }
 
+void SwayLight::setDatetime(uint16_t Y, uint8_t M, uint8_t D, uint8_t h, uint8_t m, uint8_t s) {
+  _setData(Y, M, D, h, m, s);
+  Serial.println("setDatetime:");
+  _sendDataToHT32();
+}
+
 void SwayLight::setPower(bool turnOn) {
   if(turnOn) {
     _setData(MODE_SWITCH, ON);
@@ -60,6 +66,22 @@ void SwayLight::_initData() {
 }
 
 // set data
+void SwayLight::_setData(uint16_t Y, uint8_t M, uint8_t D, uint8_t h, uint8_t m, uint8_t s) {
+  /** 
+   *  Byte -> |          [3]          |          [4]          |          [5]          |          [6]          |
+   *  bit  -> | 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|
+   *  info -> |   YEAR    |   MONTH   |      DAY     |       HOUR   |     MINUTE      | x| x|      SECOND     |
+   **/
+  _initData();
+  _dataToHT32[1] = _CONTROL_TYPE::SETTING;
+  _dataToHT32[2] = _SETTINGS::SYNC_TIME;
+  _dataToHT32[3] = ((uint8_t)(Y - 2020) << 4) + M;
+  _dataToHT32[4] = (D << 3) + (h >> 2);
+  _dataToHT32[5] = (h << 6) + m;
+  _dataToHT32[6] = s;
+  _setCheckSum();
+}
+
 void SwayLight::_setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds) {
   _initData();
   _dataToHT32[1] = controlType;

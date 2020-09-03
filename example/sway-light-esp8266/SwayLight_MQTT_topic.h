@@ -25,11 +25,17 @@ enum _POWER {
 enum _CONTROL_TYPE {
   MODE_SWITCH            = 0x01,
   LIGHT                  = 0x02,
-  MUSIC                  = 0x03
+  MUSIC                  = 0x03,
+  SETTING                = 0x04
 };
 enum _LED {
   COLOR                  = 0x01,
   DISPLAY_OFFSET         = 0x02,
   ZOOM                   = 0x03,
   STYLE                  = 0x04
+};
+
+enum _SETTINGS
+{
+  SYNC_TIME = 0xFF
 };

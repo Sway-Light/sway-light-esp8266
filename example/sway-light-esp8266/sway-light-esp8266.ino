@@ -2,6 +2,10 @@
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
+
+#include <WiFiUdp.h>
+#include <NTPClient.h>
+
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager
 #include <ArduinoJson.h>          // https://github.com/bblanchon/ArduinoJson
 #include <Adafruit_MQTT.h>        // https://github.com/adafruit/Adafruit_MQTT_Library
@@ -35,6 +39,8 @@ bool shouldSaveConfig = false;
 
 SoftwareSerial mySerial(13, 15);
 SwayLight s(mySerial);
+
+void getNtpTime();
 
 void MQTT_connect();
 void subscribeAllTopics();
@@ -92,7 +98,8 @@ void setup() {
   // Initialize the output variables as outputs
   Serial.print("mqtt_ip:");
   Serial.println(mqtt_ip);
-//  server.begin();
+  //  server.begin();
+  getNtpTime();
 }
 
 // Adafruit MQTT所有物件需等待setup()執行結束後再建立!!!
@@ -173,6 +180,32 @@ void loop() {
   // }
 }
 
+void getNtpTime() {
+  WiFiUDP ntpUDP;
+  NTPClient timeClient(ntpUDP, 28800);
+  
+  timeClient.begin();
+  timeClient.update();
+
+  unsigned long epochTime = timeClient.getEpochTime();
+  struct tm *ptm = gmtime ((time_t *)&epochTime); 
+
+  int currentDay    = ptm->tm_mday;
+  int currentMonth  = ptm->tm_mon+1;
+  int currentYear   = ptm->tm_year+1900;
+  int currentHour   = ptm->tm_hour;
+  int currentMinute = ptm->tm_min;
+  int currentSecond = ptm->tm_sec;
+  //Print complete date:
+  String currentDate = String(currentYear) + "-" + 
+                       String(currentMonth) + "-" + 
+                       String(currentDay) + " " +
+                       String(currentHour) + ":" +
+                       String(currentMinute) + ":" +
+                       String(currentSecond);
+  s.setDatetime(currentYear, currentMonth, currentDay, currentHour, currentMinute, currentSecond);
+  Serial.println(currentDate);
+ }
 void MQTT_connect() {
   int8_t ret;
   
@@ -188,7 +221,7 @@ void MQTT_connect() {
   uint8_t retries = 5;
   while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
     Serial.println(mqtt.connectErrorString(ret));
-    Serial.println("Retrying MQTT connection in 5 seconds...");
+    Serial.println("Retrying MQTT connection in 2 seconds...");
     mqtt.disconnect();
     delay(2000); // wait 2 seconds
     retries--;

@@ -7,6 +7,7 @@
 class SwayLight {
   public:
     SwayLight(SoftwareSerial& serial);
+    void setDatetime(uint16_t Y, uint8_t M, uint8_t D, uint8_t h, uint8_t m, uint8_t s);
     void setPower(bool turnOn);
     void setPower(bool turnOn, uint32_t afterSeconds);
     void setMode(uint8_t mode);
@@ -20,6 +21,7 @@ class SwayLight {
     uint8_t _dataToHT32[CMD_SIZE];
     
     void _initData(void);
+    void _setData(uint16_t Y, uint8_t M, uint8_t D, uint8_t h, uint8_t m, uint8_t s);
     void _setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds);
     void _setData(uint8_t controlType, uint8_t switchMode);
     void _setLedData(uint8_t controlMode, uint8_t ledControlType, uint8_t param);
