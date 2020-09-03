@@ -14,7 +14,7 @@
 #include "SwayLight_MQTT_topic.h"
 
 /************************* Adafruit.io Setup *********************************/
-#define AIO_SERVER "192.168.0.102"
+#define AIO_SERVER "172.20.10.6"
 #define AIO_SERVERPORT 1883 // use 1883 for SSL
 #define AIO_USERNAME ""
 #define AIO_KEY ""
@@ -52,14 +52,14 @@ void saveConfigCallback () {
   shouldSaveConfig = true;
 }
 
+WiFiManagerParameter custom_mqtt_ip(mqtt_ip, mqtt_ip, AIO_SERVER, 15);
+
+// WiFiManager
+// Local intialization. Once its business is done, there is no need to keep it around
+WiFiManager wifiManager;
+
 void setup() {
   Serial.begin(115200);
-  
-  WiFiManagerParameter custom_mqtt_ip(mqtt_ip, mqtt_ip, AIO_SERVER, 15);
-
-  // WiFiManager
-  // Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
 
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
@@ -71,11 +71,11 @@ void setup() {
   wifiManager.addParameter(&custom_mqtt_ip);
   
   // Uncomment and run it once, if you want to erase all the stored information
-  wifiManager.resetSettings();
+  // wifiManager.resetSettings();
 
   //set minimu quality of signal so it ignores AP's under that quality
   //defaults to 8%
-  //wifiManager.setMinimumSignalQuality();
+  wifiManager.setMinimumSignalQuality(15);
   
   //sets timeout until configuration portal gets turned off
   //useful to make it all retry or go to sleep
@@ -132,10 +132,9 @@ void loop() {
   // connection and automatically reconnect when disconnected). See the MQTT_connect
   // function definition further below.
   MQTT_connect();
-  
   // this is our 'wait for incoming subscription packets' busy subloop
   // try to spend your time here
-  
+
   Adafruit_MQTT_Subscribe *subscription;
   while ((subscription = mqtt.readSubscription(5000))) {
     printSubscribeInfo(subscription);
@@ -188,6 +187,9 @@ void getNtpTime() {
   timeClient.update();
 
   unsigned long epochTime = timeClient.getEpochTime();
+
+  Serial.print("epochTime: ");
+  Serial.println(epochTime);
   struct tm *ptm = gmtime ((time_t *)&epochTime); 
 
   int currentDay    = ptm->tm_mday;
@@ -203,7 +205,7 @@ void getNtpTime() {
                        String(currentHour) + ":" +
                        String(currentMinute) + ":" +
                        String(currentSecond);
-  s.setDatetime(currentYear, currentMonth, currentDay, currentHour, currentMinute, currentSecond);
+  s.setDatetime(epochTime);
   Serial.println(currentDate);
  }
 void MQTT_connect() {
@@ -226,6 +228,7 @@ void MQTT_connect() {
     delay(2000); // wait 2 seconds
     retries--;
     if (retries == 0) {
+      // wifiManager.resetSettings();
       // basically die and wait for WDT to reset me
       while (1);
     }
