@@ -9,7 +9,7 @@ class SwayLight {
     SwayLight(SoftwareSerial& serial);
     void setDatetime(uint32_t timestamp);
     void setPower(bool turnOn);
-    void setPower(bool turnOn, uint32_t afterSeconds);
+    void setPower(bool turnOn, uint8_t enableDay, uint8_t hour, uint8_t min, uint8_t sec);
     void setMode(uint8_t mode);
     void setLedColor(uint8_t controlType, uint8_t controlMode, uint32_t rgba);
     void setLedOffset(uint8_t mode, uint8_t offsetValue);
@@ -22,7 +22,7 @@ class SwayLight {
     
     void _initData(void);
     void _setData(uint32_t timestamp);
-    void _setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds);
+    void _setData(uint8_t controlType, uint8_t mode, uint8_t enableDay, uint8_t hour, uint8_t min, uint8_t sec);
     void _setData(uint8_t controlType, uint8_t switchMode);
     void _setLedData(uint8_t controlMode, uint8_t ledControlType, uint8_t param);
     void _setLedData(uint8_t controlMode, uint8_t ledControlType, uint32_t rgba);

@@ -23,11 +23,11 @@ void SwayLight::setPower(bool turnOn) {
   _sendDataToHT32();
 }
 
-void SwayLight::setPower(bool turnOn, uint32_t afterSeconds) {
+void SwayLight::setPower(bool turnOn, uint8_t enableDay, uint8_t hour, uint8_t min, uint8_t sec) {
   if(turnOn) {
-    _setData(MODE_SWITCH, ON, afterSeconds);
+    _setData(_CONTROL_TYPE::SETTING, ON, enableDay, hour, min, sec);
   }else {
-    _setData(MODE_SWITCH, OFF, afterSeconds);
+    _setData(_CONTROL_TYPE::SETTING, OFF, enableDay, hour, min, sec);
   }
   _sendDataToHT32();
 }
@@ -77,14 +77,14 @@ void SwayLight::_setData(uint32_t timestamp) {
   _setCheckSum();
 }
 
-void SwayLight::_setData(uint8_t controlType, uint8_t mode, uint32_t afterSeconds) {
+void SwayLight::_setData(uint8_t controlType, uint8_t mode, uint8_t enableDay, uint8_t hour, uint8_t min, uint8_t sec) {
   _initData();
   _dataToHT32[1] = controlType;
   _dataToHT32[2] = mode;
-  _dataToHT32[3] = (afterSeconds >> 24) & 0xFF;
-  _dataToHT32[4] = (afterSeconds >> 16) & 0xFF;
-  _dataToHT32[5] = (afterSeconds >>  8) & 0xFF;
-  _dataToHT32[6] = (afterSeconds      ) & 0xFF;
+  _dataToHT32[3] = enableDay;
+  _dataToHT32[4] = hour;
+  _dataToHT32[5] = min;
+  _dataToHT32[6] = sec;
   _setCheckSum();
 }
 

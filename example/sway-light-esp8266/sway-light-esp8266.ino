@@ -141,12 +141,29 @@ void loop() {
     if(subscription == &power) {
       bool onoff = (bool)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setPower(onoff);
-    }else if(subscription == &powerOnTime) {
-      uint32_t powerOnTime = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setPower(true, powerOnTime);
-    }else if(subscription == &powerOffTime) {
-      uint32_t powerOffTime = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setPower(false, powerOffTime);
+    }else if(subscription == &powerOffTime || subscription == &powerOnTime) {
+      StaticJsonDocument<200> doc;
+      char *json = (char *)subscription->lastread;
+      DeserializationError error = deserializeJson(doc, json);
+      // Test if parsing succeeds.
+      if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.c_str());
+      }else {
+        int enable = doc["enable"];
+        int hour = doc["hour"];
+        int min = doc["min"];
+        int sec = doc["sec"];
+        if(hour > 23 || hour < 0 || min > 59 || min < 0 || sec > 59 || sec < 0) {
+          Serial.println("json data error!!!");
+        }else {
+          if(subscription == &powerOnTime) {
+            s.setPower(true, enable, hour, min, sec);
+          }else{
+            s.setPower(false, enable, hour, min, sec);
+          }
+        }
+      }
     }else if(subscription == &currMode) {
       uint8_t mode = (uint8_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setMode(mode);
@@ -228,7 +245,7 @@ void MQTT_connect() {
     delay(2000); // wait 2 seconds
     retries--;
     if (retries == 0) {
-      // wifiManager.resetSettings();
+      wifiManager.resetSettings();
       // basically die and wait for WDT to reset me
       while (1);
     }
