@@ -14,7 +14,7 @@
 #include "SwayLight_MQTT_topic.h"
 
 /************************* Adafruit.io Setup *********************************/
-#define AIO_SERVER "172.20.10.6"
+#define AIO_SERVER "172.20.10.4"
 #define AIO_SERVERPORT 1883 // use 1883 for SSL
 #define AIO_USERNAME ""
 #define AIO_KEY ""
@@ -167,18 +167,32 @@ void loop() {
     }else if(subscription == &currMode) {
       uint8_t mode = (uint8_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setMode(mode);
-    }else if (subscription == &lightColor) {
-      uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
-      s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
+    }else if (subscription == &lightColor || subscription == &musicColor) {
+      StaticJsonDocument<200> doc;
+      char *json = (char *)subscription->lastread;
+      DeserializationError error = deserializeJson(doc, json);
+      // Test if parsing succeeds.
+      if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.c_str());
+      }else {
+        uint32_t colorInfo = 0;
+        colorInfo += (uint8_t)doc["red"] << 24;
+        colorInfo += (uint8_t)doc["green"] << 16;
+        colorInfo += (uint8_t)doc["blue"]  <<  8;
+        colorInfo += (subscription == &lightColor)? (uint8_t)doc["brightness"]: (uint8_t)doc["level"];
+        if(subscription == &lightColor) {
+          s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
+        }else {
+          s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
+        }
+      }
     }else if (subscription == &lightOffset) {
       uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedOffset(_CONTROL_TYPE::LIGHT, offsetValue);
     }else if (subscription == &lightZoom) {
       uint32_t zoomValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedZoom(zoomValue);
-    }else if (subscription == &musicColor) {
-      uint32_t colorInfo = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 16));
-      s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
     }else if (subscription == &musicOffset) {
       uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedOffset(_CONTROL_TYPE::MUSIC, offsetValue);
