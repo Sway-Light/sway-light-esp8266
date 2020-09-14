@@ -125,7 +125,7 @@ Adafruit_MQTT_Subscribe lightZoom    = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_
 
 Adafruit_MQTT_Subscribe musicColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_COLOR);
 Adafruit_MQTT_Subscribe musicOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY_OFFSET);
-Adafruit_MQTT_Subscribe musicStyle  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_STYLE);
+Adafruit_MQTT_Subscribe musicStyle   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_STYLE);
 
 void loop() {
   // Ensure the connection to the MQTT server is alive (this will make the first
@@ -142,7 +142,7 @@ void loop() {
       bool onoff = (bool)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setPower(onoff);
     }else if(subscription == &powerOffTime || subscription == &powerOnTime) {
-      StaticJsonDocument<200> doc;
+      StaticJsonDocument<300> doc;
       char *json = (char *)subscription->lastread;
       DeserializationError error = deserializeJson(doc, json);
       // Test if parsing succeeds.
@@ -150,7 +150,11 @@ void loop() {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.c_str());
       }else {
-        int enable = doc["enable"];
+        int enable = 0;
+        for (int i = 0; i < 7; i++) {
+          enable <<= 1;
+          enable += (int)(doc["enable"][i]) & 0x01;
+        }
         int hour = doc["hour"];
         int min = doc["min"];
         int sec = doc["sec"];
