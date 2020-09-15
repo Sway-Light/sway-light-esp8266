@@ -133,24 +133,24 @@ void loop() {
   MQTT_connect();
   // this is our 'wait for incoming subscription packets' busy subloop
   // try to spend your time here
-
-  Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(5000))) {
-    while (mySerial.available()) {
-      uint8_t c = mySerial.read();
-      Serial.println(c, HEX);
-      s.dataFromHt32[s.currIndex] = c;
-      if (s.currIndex == 0 && s.dataFromHt32[0] != 0x95) {
-        s.clearReciveBuff();
-        s.currIndex = 0;
-      }else {
-        s.currIndex++;
-      }
-      if(s.currIndex == CMD_SIZE - 1) {
-        s.printReciveBuff();
-        s.currIndex = 0;
-      }
+  while (mySerial.available()) {
+    uint8_t c = mySerial.read();
+    //Serial.println(c, HEX);
+    s.dataFromHt32[s.currIndex] = c;
+    if (s.currIndex == 0 && s.dataFromHt32[0] != 0x95) {
+      s.clearReciveBuff();
+      s.currIndex = 0;
+    }else {
+      s.currIndex++;
     }
+    if(s.currIndex == CMD_SIZE) {
+      s.printReciveBuff();
+      s.currIndex = 0;
+    }
+  }
+  Adafruit_MQTT_Subscribe *subscription;
+  while ((subscription = mqtt.readSubscription(500))) {
+    
     printSubscribeInfo(subscription);
     if(subscription == &power) {
       bool onoff = (bool)(strtoul((char *)subscription->lastread, NULL, 10));
