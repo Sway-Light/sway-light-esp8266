@@ -19,8 +19,7 @@
 #define AIO_USERNAME ""
 #define AIO_KEY ""
 
-
-/*************************     MQTT Topics   *********************************/
+/*************************     Serial data   *********************************/
 
 // Set web server port number to 80
 //WiFiServer server(80);
@@ -137,6 +136,21 @@ void loop() {
 
   Adafruit_MQTT_Subscribe *subscription;
   while ((subscription = mqtt.readSubscription(5000))) {
+    while (mySerial.available()) {
+      uint8_t c = mySerial.read();
+      Serial.println(c, HEX);
+      s.dataFromHt32[s.currIndex] = c;
+      if (s.currIndex == 0 && s.dataFromHt32[0] != 0x95) {
+        s.clearReciveBuff();
+        s.currIndex = 0;
+      }else {
+        s.currIndex++;
+      }
+      if(s.currIndex == CMD_SIZE - 1) {
+        s.printReciveBuff();
+        s.currIndex = 0;
+      }
+    }
     printSubscribeInfo(subscription);
     if(subscription == &power) {
       bool onoff = (bool)(strtoul((char *)subscription->lastread, NULL, 10));
@@ -291,11 +305,4 @@ void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription) {
   Serial.print((char *)subscription->topic);
   Serial.print(": ");
   Serial.println((char *)subscription->lastread);
-}
-
-void serialEvent() {
-  while (mySerial.available()) {
-    char c = mySerial.read();
-    Serial.println(c, HEX);
-  }
 }

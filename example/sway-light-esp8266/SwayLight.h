@@ -7,6 +7,8 @@
 class SwayLight {
   public:
     SwayLight(SoftwareSerial& serial);
+    uint8_t dataFromHt32[CMD_SIZE];
+    uint8_t currIndex;
     void setDatetime(uint32_t timestamp);
     void setPower(bool turnOn);
     void setPower(bool turnOn, uint8_t enableDay, uint8_t hour, uint8_t min, uint8_t sec);
@@ -15,11 +17,13 @@ class SwayLight {
     void setLedOffset(uint8_t mode, uint8_t offsetValue);
     void setLedZoom(uint8_t zoomValue);
     void setLedStyle(uint8_t styleId);
+    void clearReciveBuff(void);
+    void printReciveBuff(void);
 
   private:
     SoftwareSerial *_mcuSerial;
     uint8_t _dataToHT32[CMD_SIZE];
-    
+
     void _initData(void);
     void _setData(uint32_t timestamp);
     void _setData(uint8_t controlType, uint8_t mode, uint8_t enableDay, uint8_t hour, uint8_t min, uint8_t sec);

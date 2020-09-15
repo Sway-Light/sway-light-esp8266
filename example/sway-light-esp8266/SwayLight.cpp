@@ -5,7 +5,8 @@
 SwayLight::SwayLight(SoftwareSerial& serial) {
   _mcuSerial = &serial;
   _mcuSerial->begin(9600);
-//  _mcuSerial->println("test msg");
+  currIndex = 0;
+  //  _mcuSerial->println("test msg");
 }
 
 void SwayLight::setDatetime(uint32_t timestamp) {
@@ -55,6 +56,24 @@ void SwayLight::setLedZoom(uint8_t zoomValue) {
 void SwayLight::setLedStyle(uint8_t styleId) {
   _setLedData(_CONTROL_TYPE::MUSIC, _LED::STYLE, styleId);
   _sendDataToHT32();
+}
+
+void SwayLight::clearReciveBuff(void) {
+  for(int i = 0; i < CMD_SIZE; i++)
+    this->dataFromHt32[i] = 0;
+}
+
+void SwayLight::printReciveBuff(void) {
+  Serial.print("DEBUG: index-> ");
+  for(int i = 0; i < CMD_SIZE; i++) {
+    Serial.printf("[ %d]", i);
+  }
+  Serial.println();
+  Serial.print("DEBUG: send-> ");
+  for(int i = 0; i < CMD_SIZE; i++) {
+    Serial.printf("%4X", this->dataFromHt32[i]);
+  }
+  Serial.print("\n\n");
 }
 
 void SwayLight::_initData() {
