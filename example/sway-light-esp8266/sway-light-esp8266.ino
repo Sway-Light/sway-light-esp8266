@@ -292,3 +292,10 @@ void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription) {
   Serial.print(": ");
   Serial.println((char *)subscription->lastread);
 }
+
+void serialEvent() {
+  while (mySerial.available()) {
+    char c = mySerial.read();
+    Serial.println(c, HEX);
+  }
+}
