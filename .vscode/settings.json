@@ -1,6 +1,11 @@
 {
     "files.associations": {
         "random": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "numeric": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "limits": "cpp",
+        "ratio": "cpp"
     }
 }

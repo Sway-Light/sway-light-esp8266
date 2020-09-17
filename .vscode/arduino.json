@@ -2,5 +2,5 @@
     "sketch": "example/sway-light-esp8266/sway-light-esp8266.ino",
     "board": "esp8266:esp8266:d1",
     "output": "../build_temp",
-    "port": "/dev/tty.usbserial-1410"
+    "port": "/dev/tty.usbserial-1420"
 }
