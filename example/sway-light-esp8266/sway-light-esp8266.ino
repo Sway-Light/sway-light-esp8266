@@ -38,7 +38,7 @@ bool shouldSaveConfig = false;
 
 SoftwareSerial mySerial(13, 15);
 SwayLight s(mySerial);
-
+void serialProcess(void);
 void getNtpTime();
 
 void MQTT_connect();
@@ -109,22 +109,24 @@ WiFiClient client;
 /************ Global State (you don't need to change this!) ******************/
 // Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
 Adafruit_MQTT_Client mqtt(&client, mqtt_ip, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
-
+uint8_t qos = 0;
 // 必須follow topic規則，命名需以/feeds/作為開頭
 // Notice MQTT paths for AIO follow the form: /feeds/
-Adafruit_MQTT_Subscribe power        = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC POWER);
-Adafruit_MQTT_Subscribe powerOnTime  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC ON_TIME);
-Adafruit_MQTT_Subscribe powerOffTime = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC OFF_TIME);
+Adafruit_MQTT_Subscribe sub_power        = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC POWER);
+Adafruit_MQTT_Subscribe sub_powerOnTime  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC ON_TIME);
+Adafruit_MQTT_Subscribe sub_powerOffTime = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC OFF_TIME);
+Adafruit_MQTT_Subscribe sub_currMode     = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC CURR_MODE);
+Adafruit_MQTT_Subscribe sub_lightColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR);
+Adafruit_MQTT_Subscribe sub_lightOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_DISPLAY_OFFSET);
+Adafruit_MQTT_Subscribe sub_lightZoom    = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_ZOOM);
+Adafruit_MQTT_Subscribe sub_musicColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_COLOR);
+Adafruit_MQTT_Subscribe sub_musicOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY_OFFSET);
+Adafruit_MQTT_Subscribe sub_musicStyle   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_STYLE);
 
-Adafruit_MQTT_Subscribe currMode     = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC CURR_MODE);
-
-Adafruit_MQTT_Subscribe lightColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR);
-Adafruit_MQTT_Subscribe lightOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_DISPLAY_OFFSET);
-Adafruit_MQTT_Subscribe lightZoom    = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC LIGHT_ZOOM);
-
-Adafruit_MQTT_Subscribe musicColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_COLOR);
-Adafruit_MQTT_Subscribe musicOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY_OFFSET);
-Adafruit_MQTT_Subscribe musicStyle   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_STYLE);
+Adafruit_MQTT_Publish   pub_power        = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC POWER, qos);
+Adafruit_MQTT_Publish   pub_currMode     = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC CURR_MODE, qos);
+Adafruit_MQTT_Publish   pub_lightColor   = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR, qos);
+Adafruit_MQTT_Publish   pub_lightZoom    = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_ZOOM, qos);
 
 void loop() {
   // Ensure the connection to the MQTT server is alive (this will make the first
@@ -133,29 +135,18 @@ void loop() {
   MQTT_connect();
   // this is our 'wait for incoming subscription packets' busy subloop
   // try to spend your time here
-  while (mySerial.available()) {
-    uint8_t c = mySerial.read();
-    //Serial.println(c, HEX);
-    s.dataFromHt32[s.currIndex] = c;
-    if (s.currIndex == 0 && s.dataFromHt32[0] != 0x95) {
-      s.clearReciveBuff();
-      s.currIndex = 0;
-    }else {
-      s.currIndex++;
-    }
-    if(s.currIndex == CMD_SIZE) {
-      s.printReciveBuff();
-      s.currIndex = 0;
-    }
-  }
+  
+  // 處理HT32資料
+  serialProcess();
+
   Adafruit_MQTT_Subscribe *subscription;
   while ((subscription = mqtt.readSubscription(500))) {
     
     printSubscribeInfo(subscription);
-    if(subscription == &power) {
+    if(subscription == &sub_power) {
       bool onoff = (bool)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setPower(onoff);
-    }else if(subscription == &powerOffTime || subscription == &powerOnTime) {
+    }else if(subscription == &sub_powerOffTime || subscription == &sub_powerOnTime) {
       StaticJsonDocument<300> doc;
       char *json = (char *)subscription->lastread;
       DeserializationError error = deserializeJson(doc, json);
@@ -175,17 +166,17 @@ void loop() {
         if(hour > 23 || hour < 0 || min > 59 || min < 0 || sec > 59 || sec < 0) {
           Serial.println("json data error!!!");
         }else {
-          if(subscription == &powerOnTime) {
+          if(subscription == &sub_powerOnTime) {
             s.setPower(true, enable, hour, min, sec);
           }else{
             s.setPower(false, enable, hour, min, sec);
           }
         }
       }
-    }else if(subscription == &currMode) {
+    }else if(subscription == &sub_currMode) {
       uint8_t mode = (uint8_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setMode(mode);
-    }else if (subscription == &lightColor || subscription == &musicColor) {
+    }else if (subscription == &sub_lightColor || subscription == &sub_musicColor) {
       StaticJsonDocument<200> doc;
       char *json = (char *)subscription->lastread;
       DeserializationError error = deserializeJson(doc, json);
@@ -198,23 +189,23 @@ void loop() {
         colorInfo += (uint8_t)doc["red"] << 24;
         colorInfo += (uint8_t)doc["green"] << 16;
         colorInfo += (uint8_t)doc["blue"]  <<  8;
-        colorInfo += (subscription == &lightColor)? (uint8_t)doc["brightness"]: (uint8_t)doc["level"];
-        if(subscription == &lightColor) {
+        colorInfo += (subscription == &sub_lightColor)? (uint8_t)doc["brightness"]: (uint8_t)doc["level"];
+        if(subscription == &sub_lightColor) {
           s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
         }else {
           s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
         }
       }
-    }else if (subscription == &lightOffset) {
+    }else if (subscription == &sub_lightOffset) {
       uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedOffset(_CONTROL_TYPE::LIGHT, offsetValue);
-    }else if (subscription == &lightZoom) {
+    }else if (subscription == &sub_lightZoom) {
       uint32_t zoomValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedZoom(zoomValue);
-    }else if (subscription == &musicOffset) {
+    }else if (subscription == &sub_musicOffset) {
       uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedOffset(_CONTROL_TYPE::MUSIC, offsetValue);
-    }else if (subscription == &musicStyle) {
+    }else if (subscription == &sub_musicStyle) {
       uint32_t styleId = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
       s.setLedStyle(styleId);
     }
@@ -226,6 +217,59 @@ void loop() {
   //   mqtt.disconnect();
   //   Serial.println("MQTT Disconnected!");
   // }
+}
+
+void serialProcess() {
+  while (mySerial.available()) {
+    uint8_t c = mySerial.read();
+    //Serial.println(c, HEX);
+    s.dataFromHt32[s.currIndex] = c;
+    if (s.currIndex == 0 && s.dataFromHt32[0] != 0x95) {
+      s.clearReciveBuff();
+      s.currIndex = 0;
+    }else {
+      s.currIndex++;
+    }
+    if(s.currIndex == CMD_SIZE) {
+      if(s.isValid()) {
+        char str[16];
+        switch(s.getControlType()) {
+          case _CONTROL_TYPE::MODE_SWITCH:
+            itoa(s.getControlType(), str, 10);
+            if (s.getStatus() == _STATUS::OFF)
+            {
+              pub_power.publish(str);
+            }
+            else if (s.getStatus() == _STATUS::ON) {
+              pub_power.publish(str);
+            }
+            else if (s.getStatus() == _STATUS::STATUS_LIGHT) {
+              pub_currMode.publish(str);
+            }
+            else if (s.getStatus() == _STATUS::STATUS_MUSIC) {
+              pub_currMode.publish(str);
+            }
+            break;
+
+          case _CONTROL_TYPE::LIGHT:
+            if(s.getLedType() == _LED::COLOR) {
+              // 牽扯到JSON objecet, 待實作
+              Serial.println("TBD");
+            }else if(s.getLedType() == _LED::ZOOM) {
+              itoa(s.getLedType(), str, 10);
+              pub_lightZoom.publish(str);
+            }
+            break;
+
+          default:
+            Serial.println("control type error");
+          }
+      }
+      s.printReciveBuff();
+      s.clearReciveBuff();
+      s.currIndex = 0;
+    }
+  }
 }
 
 void getNtpTime() {
@@ -286,19 +330,19 @@ void MQTT_connect() {
 }
 
 void subscribeAllTopics() {
-  mqtt.subscribe(&power);
-  mqtt.subscribe(&powerOnTime);
-  mqtt.subscribe(&powerOffTime);
+  mqtt.subscribe(&sub_power);
+  mqtt.subscribe(&sub_powerOnTime);
+  mqtt.subscribe(&sub_powerOffTime);
 
-  mqtt.subscribe(&currMode);
+  mqtt.subscribe(&sub_currMode);
 
-  mqtt.subscribe(&lightColor);
-  mqtt.subscribe(&lightOffset);
-  mqtt.subscribe(&lightZoom);
+  mqtt.subscribe(&sub_lightColor);
+  mqtt.subscribe(&sub_lightOffset);
+  mqtt.subscribe(&sub_lightZoom);
 
-  mqtt.subscribe(&musicColor);
-  mqtt.subscribe(&musicOffset);
-  mqtt.subscribe(&musicStyle);
+  mqtt.subscribe(&sub_musicColor);
+  mqtt.subscribe(&sub_musicOffset);
+  mqtt.subscribe(&sub_musicStyle);
 }
 
 void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription) {

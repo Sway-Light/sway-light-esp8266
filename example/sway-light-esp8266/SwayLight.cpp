@@ -9,6 +9,8 @@ SwayLight::SwayLight(SoftwareSerial& serial) {
   //  _mcuSerial->println("test msg");
 }
 
+/**********   TRANSMIT   **********/
+
 void SwayLight::setDatetime(uint32_t timestamp) {
   _setData(timestamp);
   Serial.println("setDatetime:");
@@ -56,6 +58,48 @@ void SwayLight::setLedZoom(uint8_t zoomValue) {
 void SwayLight::setLedStyle(uint8_t styleId) {
   _setLedData(_CONTROL_TYPE::MUSIC, _LED::STYLE, styleId);
   _sendDataToHT32();
+}
+
+/**********   RECIVE   **********/
+bool SwayLight::isValid(void) {
+  int sum = 0;
+  uint16_t checksum = this->dataFromHt32[7] << 8 + this->dataFromHt32[8];
+  for (int i = 1; i <= 6; i++) {
+    sum += this->dataFromHt32[i];
+  }
+  if(sum == checksum) {
+    Serial.println("Checksum correct");
+  }else {
+    Serial.println("Checksum ERROR!!");
+  }
+  return (sum == checksum);
+}
+
+uint8_t SwayLight::getControlType() {
+  return this->dataFromHt32[1];
+}
+
+uint8_t SwayLight::getStatus(void) {
+  return this->dataFromHt32[2];
+}
+
+uint8_t SwayLight::getLedType(void) {
+  return this->dataFromHt32[2];
+}
+
+uint8_t SwayLight::getLedParamVal(void) {
+  return this->dataFromHt32[3];
+}
+
+uint8_t SwayLight::getRed(void) {
+  return this->dataFromHt32[4];
+}
+uint8_t SwayLight::getGreen(void) {
+  return this->dataFromHt32[5];
+}
+
+uint8_t SwayLight::getBlue(void) {
+  return this->dataFromHt32[6];
 }
 
 void SwayLight::clearReciveBuff(void) {

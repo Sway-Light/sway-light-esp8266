@@ -17,6 +17,16 @@ class SwayLight {
     void setLedOffset(uint8_t mode, uint8_t offsetValue);
     void setLedZoom(uint8_t zoomValue);
     void setLedStyle(uint8_t styleId);
+
+    // recive
+    bool isValid(void);
+    uint8_t getControlType(void);
+    uint8_t getStatus(void);
+    uint8_t getLedType(void);
+    uint8_t getLedParamVal(void);
+    uint8_t getRed(void);
+    uint8_t getGreen(void);
+    uint8_t getBlue(void);
     void clearReciveBuff(void);
     void printReciveBuff(void);
 

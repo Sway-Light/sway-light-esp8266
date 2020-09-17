@@ -18,9 +18,11 @@ enum _CONST_BYTE {
   END_BYTE               = 0x87,
   START_BYTE             = 0x95
 };
-enum _POWER {
+enum _STATUS {
   OFF                    = 0x00,
-  ON                     = 0x01
+  ON                     = 0x01,
+  STATUS_LIGHT           = 0x02,
+  STATUS_MUSIC           = 0x03
 };
 enum _CONTROL_TYPE {
   MODE_SWITCH            = 0x01,
