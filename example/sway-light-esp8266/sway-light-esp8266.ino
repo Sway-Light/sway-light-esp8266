@@ -231,11 +231,12 @@ void serialProcess() {
       s.currIndex++;
     }
     if(s.currIndex == CMD_SIZE) {
+      
       if(s.isValid()) {
         char str[16];
         switch(s.getControlType()) {
           case _CONTROL_TYPE::MODE_SWITCH:
-            itoa(s.getControlType(), str, 10);
+            itoa(s.getStatus(), str, 10);
             if (s.getStatus() == _STATUS::OFF)
             {
               pub_power.publish(str);

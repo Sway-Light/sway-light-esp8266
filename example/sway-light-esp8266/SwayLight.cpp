@@ -62,8 +62,8 @@ void SwayLight::setLedStyle(uint8_t styleId) {
 
 /**********   RECIVE   **********/
 bool SwayLight::isValid(void) {
-  int sum = 0;
-  uint16_t checksum = this->dataFromHt32[7] << 8 + this->dataFromHt32[8];
+  uint16_t sum = 0;
+  uint16_t checksum = (this->dataFromHt32[7] << 8) + this->dataFromHt32[8];
   for (int i = 1; i <= 6; i++) {
     sum += this->dataFromHt32[i];
   }
