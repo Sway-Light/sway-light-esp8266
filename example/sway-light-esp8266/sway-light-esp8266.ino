@@ -14,7 +14,7 @@
 #include "SwayLight_MQTT_topic.h"
 
 /************************* Adafruit.io Setup *********************************/
-#define AIO_SERVER "172.20.10.4"
+#define AIO_SERVER "172.20.10.6"
 #define AIO_SERVERPORT 1883 // use 1883 for SSL
 #define AIO_USERNAME ""
 #define AIO_KEY ""
@@ -231,24 +231,25 @@ void serialProcess() {
           case _CONTROL_TYPE::MODE_SWITCH:
             if (s.getStatus() == _STATUS::OFF) {
               pubDoc["value"] = _STATUS::OFF;
-              serializeJson(doc, pubMsg);
+              serializeJson(pubDoc, pubMsg);
               pub_power.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::ON) {
               pubDoc["value"] = _STATUS::ON;
-              serializeJson(doc, pubMsg);
+              serializeJson(pubDoc, pubMsg);
               pub_power.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::STATUS_LIGHT) {
               pubDoc["value"] = _STATUS::STATUS_LIGHT;
-              serializeJson(doc, pubMsg);
+              serializeJson(pubDoc, pubMsg);
               pub_currMode.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::STATUS_MUSIC) {
               pubDoc["value"] = _STATUS::STATUS_MUSIC;
-              serializeJson(doc, pubMsg);
+              serializeJson(pubDoc, pubMsg);
               pub_currMode.publish(pubMsg);
             }
+            Serial.println(pubMsg);
             break;
 
           case _CONTROL_TYPE::LIGHT:
@@ -256,11 +257,12 @@ void serialProcess() {
               pubDoc["red"] = s.getRed();
               pubDoc["green"] = s.getGreen();
               pubDoc["blue"] = s.getBlue();
-              pubDoc["level"] = s.getLedParamVal();
-              serializeJson(doc, pubMsg);
+              pubDoc["brightness"] = s.getLedParamVal();
+              serializeJson(pubDoc, pubMsg);
+              pub_lightColor.publish(pubMsg);
             }else if(s.getLedType() == _LED::ZOOM) {
               pubDoc["zoom"] = s.getLedParamVal();
-              serializeJson(doc, pubMsg);
+              serializeJson(pubDoc, pubMsg);
               pub_lightZoom.publish(pubMsg);
             }
             break;
