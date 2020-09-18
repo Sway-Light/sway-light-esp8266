@@ -3,6 +3,9 @@
 
 #define CMD_SIZE 10
 #include <SoftwareSerial.h>
+#include <ArduinoJson.h>
+#include <string.h>
+#define CLIENT_ID "esp8266"
 
 class SwayLight {
   public:
@@ -29,6 +32,7 @@ class SwayLight {
     uint8_t getBlue(void);
     void clearReciveBuff(void);
     void printReciveBuff(void);
+    bool isFromMyself(void);
 
   private:
     SoftwareSerial *_mcuSerial;

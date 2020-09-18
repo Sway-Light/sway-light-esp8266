@@ -120,6 +120,15 @@ void SwayLight::printReciveBuff(void) {
   Serial.print("\n\n");
 }
 
+bool SwayLight::isFromMyself(void) {
+  StaticJsonDocument<200> extern doc;
+  if(strcmp(doc["id"], CLIENT_ID) == 0) {
+    return true;
+  }else {
+    return false;
+  }
+}
+
 void SwayLight::_initData() {
   for(int i = 0; i < CMD_SIZE; i++) {
     _dataToHT32[i] = 0x00;

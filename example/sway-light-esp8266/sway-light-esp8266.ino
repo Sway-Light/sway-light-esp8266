@@ -38,6 +38,10 @@ bool shouldSaveConfig = false;
 
 SoftwareSerial mySerial(13, 15);
 SwayLight s(mySerial);
+
+StaticJsonDocument<200> doc;
+StaticJsonDocument<200> pubDoc;
+
 void serialProcess(void);
 void getNtpTime();
 
@@ -141,20 +145,21 @@ void loop() {
 
   Adafruit_MQTT_Subscribe *subscription;
   while ((subscription = mqtt.readSubscription(500))) {
-    
     printSubscribeInfo(subscription);
-    if(subscription == &sub_power) {
-      bool onoff = (bool)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setPower(onoff);
-    }else if(subscription == &sub_powerOffTime || subscription == &sub_powerOnTime) {
-      StaticJsonDocument<300> doc;
-      char *json = (char *)subscription->lastread;
-      DeserializationError error = deserializeJson(doc, json);
-      // Test if parsing succeeds.
-      if (error) {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.c_str());
-      }else {
+    char *json = (char *)subscription->lastread;
+    DeserializationError error = deserializeJson(doc, json);
+    // Test if parsing succeeds.
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+    }else {
+      if(s.isFromMyself()) {
+        Serial.println("msg from my self");
+        break;
+      }
+      if(subscription == &sub_power) {
+        s.setPower((int)doc["value"]);
+      }else if(subscription == &sub_powerOffTime || subscription == &sub_powerOnTime) {
         int enable = 0;
         for (int i = 0; i < 7; i++) {
           enable <<= 1;
@@ -172,19 +177,9 @@ void loop() {
             s.setPower(false, enable, hour, min, sec);
           }
         }
-      }
-    }else if(subscription == &sub_currMode) {
-      uint8_t mode = (uint8_t)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setMode(mode);
-    }else if (subscription == &sub_lightColor || subscription == &sub_musicColor) {
-      StaticJsonDocument<200> doc;
-      char *json = (char *)subscription->lastread;
-      DeserializationError error = deserializeJson(doc, json);
-      // Test if parsing succeeds.
-      if (error) {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.c_str());
-      }else {
+      }else if(subscription == &sub_currMode) {
+        s.setMode((int)doc["value"]);
+      }else if (subscription == &sub_lightColor || subscription == &sub_musicColor) {
         uint32_t colorInfo = 0;
         colorInfo += (uint8_t)doc["red"] << 24;
         colorInfo += (uint8_t)doc["green"] << 16;
@@ -195,19 +190,15 @@ void loop() {
         }else {
           s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
         }
-      }
-    }else if (subscription == &sub_lightOffset) {
-      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setLedOffset(_CONTROL_TYPE::LIGHT, offsetValue);
-    }else if (subscription == &sub_lightZoom) {
-      uint32_t zoomValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setLedZoom(zoomValue);
-    }else if (subscription == &sub_musicOffset) {
-      uint32_t offsetValue = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setLedOffset(_CONTROL_TYPE::MUSIC, offsetValue);
-    }else if (subscription == &sub_musicStyle) {
-      uint32_t styleId = (uint32_t)(strtoul((char *)subscription->lastread, NULL, 10));
-      s.setLedStyle(styleId);
+      }else if (subscription == &sub_lightOffset) {
+        s.setLedOffset(_CONTROL_TYPE::LIGHT, (int)doc["value"]);
+      }else if (subscription == &sub_lightZoom) {
+        s.setLedZoom((int)doc["value"]);
+      }else if (subscription == &sub_musicOffset) {
+        s.setLedOffset(_CONTROL_TYPE::MUSIC, (int)doc["value"]);
+      }else if (subscription == &sub_musicStyle) {
+        s.setLedStyle((int)doc["value"]);
+      } 
     }
   }
   // ping the server to keep the mqtt connection alive
@@ -233,32 +224,44 @@ void serialProcess() {
     if(s.currIndex == CMD_SIZE) {
       
       if(s.isValid()) {
-        char str[16];
+        char pubMsg[200];
+        pubDoc.clear();
+        pubDoc["id"] = CLIENT_ID;
         switch(s.getControlType()) {
           case _CONTROL_TYPE::MODE_SWITCH:
-            itoa(s.getStatus(), str, 10);
-            if (s.getStatus() == _STATUS::OFF)
-            {
-              pub_power.publish(str);
+            if (s.getStatus() == _STATUS::OFF) {
+              pubDoc["value"] = _STATUS::OFF;
+              serializeJson(doc, pubMsg);
+              pub_power.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::ON) {
-              pub_power.publish(str);
+              pubDoc["value"] = _STATUS::ON;
+              serializeJson(doc, pubMsg);
+              pub_power.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::STATUS_LIGHT) {
-              pub_currMode.publish(str);
+              pubDoc["value"] = _STATUS::STATUS_LIGHT;
+              serializeJson(doc, pubMsg);
+              pub_currMode.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::STATUS_MUSIC) {
-              pub_currMode.publish(str);
+              pubDoc["value"] = _STATUS::STATUS_MUSIC;
+              serializeJson(doc, pubMsg);
+              pub_currMode.publish(pubMsg);
             }
             break;
 
           case _CONTROL_TYPE::LIGHT:
             if(s.getLedType() == _LED::COLOR) {
-              // 牽扯到JSON objecet, 待實作
-              Serial.println("TBD");
+              pubDoc["red"] = s.getRed();
+              pubDoc["green"] = s.getGreen();
+              pubDoc["blue"] = s.getBlue();
+              pubDoc["level"] = s.getLedParamVal();
+              serializeJson(doc, pubMsg);
             }else if(s.getLedType() == _LED::ZOOM) {
-              itoa(s.getLedType(), str, 10);
-              pub_lightZoom.publish(str);
+              pubDoc["zoom"] = s.getLedParamVal();
+              serializeJson(doc, pubMsg);
+              pub_lightZoom.publish(pubMsg);
             }
             break;
 
