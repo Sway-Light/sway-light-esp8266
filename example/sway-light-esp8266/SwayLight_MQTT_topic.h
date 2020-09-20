@@ -14,6 +14,22 @@
 #define MUSIC_DISPLAY_OFFSET  "mode/music/offset"
 #define MUSIC_STYLE           "mode/music/style"
 
+/********** JSON KEY ***********/
+#define SL_ID                    "id"
+#define SL_VALUE                 "value"
+
+#define SL_RED                   "red"
+#define SL_GREEN                 "green"
+#define SL_BLUE                  "blue"
+#define SL_LEV                   "level"
+#define SL_BRIGHT                "brightness"
+#define SL_ZOOM                  "zoom"
+
+#define SL_HOUR                  "hour"
+#define SL_MIN                   "min"
+#define SL_SEC                   "sec"
+#define SL_ENABLE                "enable"
+
 enum _CONST_BYTE {
   END_BYTE               = 0x87,
   START_BYTE             = 0x95
@@ -37,7 +53,6 @@ enum _LED {
   STYLE                  = 0x04
 };
 
-enum _SETTINGS
-{
-  SYNC_TIME = 0xFF
+enum _SETTINGS {
+  SYNC_TIME              = 0xFF
 };

@@ -122,7 +122,7 @@ void SwayLight::printReciveBuff(void) {
 
 bool SwayLight::isFromMyself(void) {
   StaticJsonDocument<200> extern doc;
-  if(strcmp(doc["id"], CLIENT_ID) == 0) {
+  if(strcmp(doc[SL_ID], CLIENT_ID) == 0) {
     return true;
   }else {
     return false;

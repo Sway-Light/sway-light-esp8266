@@ -158,16 +158,16 @@ void loop() {
         break;
       }
       if(subscription == &sub_power) {
-        s.setPower((int)doc["value"]);
+        s.setPower((int)doc[SL_VALUE]);
       }else if(subscription == &sub_powerOffTime || subscription == &sub_powerOnTime) {
         int enable = 0;
         for (int i = 0; i < 7; i++) {
           enable <<= 1;
-          enable += (int)(doc["enable"][i]) & 0x01;
+          enable += (int)(doc[SL_ENABLE][i]) & 0x01;
         }
-        int hour = doc["hour"];
-        int min = doc["min"];
-        int sec = doc["sec"];
+        int hour = doc[SL_HOUR];
+        int min = doc[SL_MIN];
+        int sec = doc[SL_SEC];
         if(hour > 23 || hour < 0 || min > 59 || min < 0 || sec > 59 || sec < 0) {
           Serial.println("json data error!!!");
         }else {
@@ -178,26 +178,26 @@ void loop() {
           }
         }
       }else if(subscription == &sub_currMode) {
-        s.setMode((int)doc["value"]);
+        s.setMode((int)doc[SL_VALUE]);
       }else if (subscription == &sub_lightColor || subscription == &sub_musicColor) {
         uint32_t colorInfo = 0;
-        colorInfo += (uint8_t)doc["red"] << 24;
-        colorInfo += (uint8_t)doc["green"] << 16;
-        colorInfo += (uint8_t)doc["blue"]  <<  8;
-        colorInfo += (subscription == &sub_lightColor)? (uint8_t)doc["brightness"]: (uint8_t)doc["level"];
+        colorInfo += (uint8_t)doc[SL_RED] << 24;
+        colorInfo += (uint8_t)doc[SL_GREEN] << 16;
+        colorInfo += (uint8_t)doc[SL_BLUE]  <<  8;
+        colorInfo += (subscription == &sub_lightColor)? (uint8_t)doc[SL_BRIGHT]: (uint8_t)doc[SL_LEV];
         if(subscription == &sub_lightColor) {
           s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
         }else {
           s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
         }
       }else if (subscription == &sub_lightOffset) {
-        s.setLedOffset(_CONTROL_TYPE::LIGHT, (int)doc["value"]);
+        s.setLedOffset(_CONTROL_TYPE::LIGHT, (int)doc[SL_VALUE]);
       }else if (subscription == &sub_lightZoom) {
-        s.setLedZoom((int)doc["value"]);
+        s.setLedZoom((int)doc[SL_VALUE]);
       }else if (subscription == &sub_musicOffset) {
-        s.setLedOffset(_CONTROL_TYPE::MUSIC, (int)doc["value"]);
+        s.setLedOffset(_CONTROL_TYPE::MUSIC, (int)doc[SL_VALUE]);
       }else if (subscription == &sub_musicStyle) {
-        s.setLedStyle((int)doc["value"]);
+        s.setLedStyle((int)doc[SL_VALUE]);
       } 
     }
   }
@@ -226,26 +226,26 @@ void serialProcess() {
       if(s.isValid()) {
         char pubMsg[200];
         pubDoc.clear();
-        pubDoc["id"] = CLIENT_ID;
+        pubDoc[SL_ID] = CLIENT_ID;
         switch(s.getControlType()) {
           case _CONTROL_TYPE::MODE_SWITCH:
             if (s.getStatus() == _STATUS::OFF) {
-              pubDoc["value"] = _STATUS::OFF;
+              pubDoc[SL_VALUE] = _STATUS::OFF;
               serializeJson(pubDoc, pubMsg);
               pub_power.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::ON) {
-              pubDoc["value"] = _STATUS::ON;
+              pubDoc[SL_VALUE] = _STATUS::ON;
               serializeJson(pubDoc, pubMsg);
               pub_power.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::STATUS_LIGHT) {
-              pubDoc["value"] = _STATUS::STATUS_LIGHT;
+              pubDoc[SL_VALUE] = _STATUS::STATUS_LIGHT;
               serializeJson(pubDoc, pubMsg);
               pub_currMode.publish(pubMsg);
             }
             else if (s.getStatus() == _STATUS::STATUS_MUSIC) {
-              pubDoc["value"] = _STATUS::STATUS_MUSIC;
+              pubDoc[SL_VALUE] = _STATUS::STATUS_MUSIC;
               serializeJson(pubDoc, pubMsg);
               pub_currMode.publish(pubMsg);
             }
@@ -254,10 +254,10 @@ void serialProcess() {
 
           case _CONTROL_TYPE::LIGHT:
             if(s.getLedType() == _LED::COLOR) {
-              pubDoc["red"] = s.getRed();
-              pubDoc["green"] = s.getGreen();
-              pubDoc["blue"] = s.getBlue();
-              pubDoc["brightness"] = s.getLedParamVal();
+              pubDoc[SL_RED] = s.getRed();
+              pubDoc[SL_GREEN] = s.getGreen();
+              pubDoc[SL_BLUE] = s.getBlue();
+              pubDoc[SL_BRIGHT] = s.getLedParamVal();
               serializeJson(pubDoc, pubMsg);
               pub_lightColor.publish(pubMsg);
             }else if(s.getLedType() == _LED::ZOOM) {
