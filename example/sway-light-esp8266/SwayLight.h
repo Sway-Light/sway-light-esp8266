@@ -17,9 +17,11 @@ class SwayLight {
     void setPower(bool turnOn, uint8_t enableDay, uint8_t hour, uint8_t min, uint8_t sec);
     void setMode(uint8_t mode);
     void setLedColor(uint8_t controlType, uint8_t controlMode, uint32_t rgba);
+    // setLed offset, zoom合併至 setLedDisplay
     void setLedOffset(uint8_t mode, uint8_t offsetValue);
     void setLedZoom(uint8_t zoomValue);
     void setLedStyle(uint8_t styleId);
+    void setLedDisplay(uint8_t mode, uint8_t offsetValue, uint8_t zoomValue);
 
     // recive
     bool isValid(void);

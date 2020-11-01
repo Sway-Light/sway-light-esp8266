@@ -45,13 +45,27 @@ void SwayLight::setLedColor(uint8_t controlMode, uint8_t controlType, uint32_t r
   _sendDataToHT32();
 }
 
+// setLedOffset合併至setLedDisplay
 void SwayLight::setLedOffset(uint8_t mode, uint8_t offsetValue) {
   _setLedData(mode, _LED::DISPLAY_OFFSET, offsetValue);
   _sendDataToHT32();
 }
 
+// setLedZoom合併至setLedDisplay
 void SwayLight::setLedZoom(uint8_t zoomValue) {
   _setLedData(_CONTROL_TYPE::LIGHT, _LED::ZOOM, zoomValue);
+  _sendDataToHT32();
+}
+
+void SwayLight::setLedDisplay(uint8_t mode, 
+                              uint8_t offsetValue, 
+                              uint8_t zoomValue) {
+  _initData();
+  _dataToHT32[1] = mode;
+  _dataToHT32[2] = _LED::LED_DISPLAY;
+  _dataToHT32[3] = offsetValue;
+  _dataToHT32[4] = zoomValue;
+  _setCheckSum();
   _sendDataToHT32();
 }
 

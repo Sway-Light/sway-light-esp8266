@@ -9,10 +9,12 @@
 #define LIGHT_COLOR           "mode/light/color"
 #define LIGHT_ZOOM            "mode/light/zoom"
 #define LIGHT_DISPLAY_OFFSET  "mode/light/offset"
+#define LIGHT_DISPLAY         "mode/light/display"
 
 #define MUSIC_COLOR           "mode/music/color"
 #define MUSIC_DISPLAY_OFFSET  "mode/music/offset"
 #define MUSIC_STYLE           "mode/music/style"
+#define MUSIC_DISPLAY         "mode/music/display"
 
 /********** JSON KEY ***********/
 #define SL_ID                    "id"
@@ -24,6 +26,7 @@
 #define SL_LEV                   "level"
 #define SL_BRIGHT                "brightness"
 #define SL_ZOOM                  "zoom"
+#define SL_OFFSET                "offset"
 
 #define SL_HOUR                  "hour"
 #define SL_MIN                   "min"
@@ -48,9 +51,11 @@ enum _CONTROL_TYPE {
 };
 enum _LED {
   COLOR                  = 0x01,
+  // DISPLAY_OFFSET, ZOOM合併至DISPLAY
   DISPLAY_OFFSET         = 0x02,
   ZOOM                   = 0x03,
-  STYLE                  = 0x04
+  STYLE                  = 0x04,
+  LED_DISPLAY            = 0x05
 };
 
 enum _SETTINGS {
