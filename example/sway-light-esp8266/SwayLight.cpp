@@ -59,12 +59,14 @@ void SwayLight::setLedZoom(uint8_t zoomValue) {
 
 void SwayLight::setLedDisplay(uint8_t mode, 
                               uint8_t offsetValue, 
-                              uint8_t zoomValue) {
+                              uint8_t zoomValue,
+                              uint8_t brightnessValue) {
   _initData();
   _dataToHT32[1] = mode;
   _dataToHT32[2] = _LED::LED_DISPLAY;
   _dataToHT32[3] = offsetValue;
   _dataToHT32[4] = zoomValue;
+  _dataToHT32[5] = brightnessValue;
   _setCheckSum();
   _sendDataToHT32();
 }

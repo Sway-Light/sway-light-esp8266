@@ -210,7 +210,11 @@ void loop() {
         if (subscription == &sub_musicDisplay) {
           mode = _CONTROL_TYPE::MUSIC;
         }
-        s.setLedDisplay(mode, (uint8_t)doc[SL_OFFSET], (uint8_t)doc[SL_ZOOM]);
+        s.setLedDisplay(
+          mode, 
+          (uint8_t)doc[SL_OFFSET], 
+          (uint8_t)doc[SL_ZOOM],
+          (uint8_t)doc[SL_BRIGHT]);
       }
     }
   }

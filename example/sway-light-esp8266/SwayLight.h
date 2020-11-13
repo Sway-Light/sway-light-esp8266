@@ -21,7 +21,11 @@ class SwayLight {
     void setLedOffset(uint8_t mode, uint8_t offsetValue);
     void setLedZoom(uint8_t zoomValue);
     void setLedStyle(uint8_t styleId);
-    void setLedDisplay(uint8_t mode, uint8_t offsetValue, uint8_t zoomValue);
+    void setLedDisplay(
+      uint8_t mode, 
+      uint8_t offsetValue,
+      uint8_t zoomValue,
+      uint8_t brightnessValue);
 
     // recive
     bool isValid(void);
