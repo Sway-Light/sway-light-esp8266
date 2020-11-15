@@ -118,6 +118,18 @@ uint8_t SwayLight::getBlue(void) {
   return this->dataFromHt32[6];
 }
 
+uint8_t SwayLight::getOffset(void) {
+  return this->dataFromHt32[3];
+}
+
+uint8_t SwayLight::getZoom(void) {
+  return this->dataFromHt32[4];
+}
+
+uint8_t SwayLight::getBrightness(void) {
+  return this->dataFromHt32[5];
+}
+
 void SwayLight::clearReciveBuff(void) {
   for(int i = 0; i < CMD_SIZE; i++)
     this->dataFromHt32[i] = 0;

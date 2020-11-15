@@ -36,6 +36,9 @@ class SwayLight {
     uint8_t getRed(void);
     uint8_t getGreen(void);
     uint8_t getBlue(void);
+    uint8_t getOffset(void);
+    uint8_t getZoom(void);
+    uint8_t getBrightness(void);
     void clearReciveBuff(void);
     void printReciveBuff(void);
     bool isFromMyself(void);

@@ -137,6 +137,8 @@ Adafruit_MQTT_Publish   pub_power        = Adafruit_MQTT_Publish(&mqtt, MY_DEVIC
 Adafruit_MQTT_Publish   pub_currMode     = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC CURR_MODE, qos);
 Adafruit_MQTT_Publish   pub_lightColor   = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR, qos);
 Adafruit_MQTT_Publish   pub_lightZoom    = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_ZOOM, qos);
+Adafruit_MQTT_Publish   pub_lightDisplay = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_DISPLAY, qos);
+Adafruit_MQTT_Publish   pub_musicDisplay = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY, qos);
 
 void loop() {
   // Ensure the connection to the MQTT server is alive (this will make the first
@@ -281,6 +283,20 @@ void serialProcess() {
               pubDoc["zoom"] = s.getLedParamVal();
               serializeJson(pubDoc, pubMsg);
               pub_lightZoom.publish(pubMsg);
+            }else if(s.getLedType() == _LED::LED_DISPLAY) {
+              pubDoc[SL_ZOOM] = s.getZoom();
+              pubDoc[SL_BRIGHT] = s.getBrightness();
+              pubDoc[SL_OFFSET] = s.getOffset();
+              pub_lightDisplay.publish(pubMsg);
+            }
+            break;
+
+          case _CONTROL_TYPE::MUSIC:
+            if(s.getLedType() == _LED::LED_DISPLAY) {
+              pubDoc[SL_ZOOM] = s.getZoom();
+              pubDoc[SL_BRIGHT] = s.getBrightness();
+              pubDoc[SL_OFFSET] = s.getOffset();
+              pub_musicDisplay.publish(pubMsg);
             }
             break;
 
