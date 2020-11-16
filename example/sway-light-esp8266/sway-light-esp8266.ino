@@ -287,6 +287,7 @@ void serialProcess() {
               pubDoc[SL_ZOOM] = s.getZoom();
               pubDoc[SL_BRIGHT] = s.getBrightness();
               pubDoc[SL_OFFSET] = s.getOffset();
+              serializeJson(pubDoc, pubMsg);
               pub_lightDisplay.publish(pubMsg);
             }
             break;
@@ -296,6 +297,7 @@ void serialProcess() {
               pubDoc[SL_ZOOM] = s.getZoom();
               pubDoc[SL_BRIGHT] = s.getBrightness();
               pubDoc[SL_OFFSET] = s.getOffset();
+              serializeJson(pubDoc, pubMsg);
               pub_musicDisplay.publish(pubMsg);
             }
             break;
