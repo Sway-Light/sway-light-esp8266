@@ -76,6 +76,15 @@ void SwayLight::setLedStyle(uint8_t styleId) {
   _sendDataToHT32();
 }
 
+void SwayLight::setOptionConfig(uint8_t fftMag) {
+  _initData();
+  _dataToHT32[1] = _CONTROL_TYPE::SETTING;
+  _dataToHT32[2] = _SETTINGS::OPTION;
+  _dataToHT32[3] = fftMag;
+  _setCheckSum();
+  _sendDataToHT32();
+}
+
 /**********   RECIVE   **********/
 bool SwayLight::isValid(void) {
   uint16_t sum = 0;

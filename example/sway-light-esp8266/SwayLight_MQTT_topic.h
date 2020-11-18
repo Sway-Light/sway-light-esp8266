@@ -5,6 +5,7 @@
 
 #define CURR_MODE             "status"
 #define POWER                 "power"
+#define OPTION_CONFIG         "option_config"
 
 #define LIGHT_COLOR           "mode/light/color"
 #define LIGHT_ZOOM            "mode/light/zoom"
@@ -33,6 +34,8 @@
 #define SL_SEC                   "sec"
 #define SL_ENABLE                "enable"
 
+#define SL_FFT_MAG               "fft_mag"
+
 enum _CONST_BYTE {
   END_BYTE               = 0x87,
   START_BYTE             = 0x95
@@ -59,5 +62,6 @@ enum _LED {
 };
 
 enum _SETTINGS {
-  SYNC_TIME              = 0xFF
+  SYNC_TIME              = 0xFF,
+  OPTION                 = 0xFE
 };

@@ -133,6 +133,8 @@ Adafruit_MQTT_Subscribe sub_musicOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEV
 Adafruit_MQTT_Subscribe sub_musicStyle   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_STYLE);
 Adafruit_MQTT_Subscribe sub_musicDisplay = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY);
 
+Adafruit_MQTT_Subscribe sub_optionConfig = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC OPTION_CONFIG);
+
 Adafruit_MQTT_Publish   pub_power        = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC POWER, qos);
 Adafruit_MQTT_Publish   pub_currMode     = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC CURR_MODE, qos);
 Adafruit_MQTT_Publish   pub_lightColor   = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_COLOR, qos);
@@ -217,6 +219,8 @@ void loop() {
           (uint8_t)doc[SL_OFFSET], 
           (uint8_t)doc[SL_ZOOM],
           (uint8_t)doc[SL_BRIGHT]);
+      }else if (subscription == &sub_optionConfig) {
+        s.setOptionConfig((uint8_t)doc[SL_FFT_MAG]);
       }
     }
   }
