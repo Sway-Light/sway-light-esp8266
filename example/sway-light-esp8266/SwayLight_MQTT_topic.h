@@ -24,6 +24,7 @@
 #define SL_RED                   "r"
 #define SL_GREEN                 "g"
 #define SL_BLUE                  "b"
+#define SL_COLOR                 "color"
 #define SL_HIGH                  "h"
 #define SL_MEDIUM                "m"
 #define SL_LOW                   "l"

@@ -193,19 +193,13 @@ void loop() {
         uint32_t hColorInfo = 0;
         uint32_t mColorInfo = 0;
         uint32_t lColorInfo = 0;
-        hColorInfo += (uint8_t)doc[SL_HIGH][SL_RED]  << 24;
-        hColorInfo += (uint8_t)doc[SL_HIGH][SL_GREEN]<< 16;
-        hColorInfo += (uint8_t)doc[SL_HIGH][SL_BLUE] << 8;
+        hColorInfo += (uint32_t)doc[SL_HIGH][SL_COLOR]  << 8;
         hColorInfo += 1;
 
-        mColorInfo += (uint8_t)doc[SL_MEDIUM][SL_RED]  << 24;
-        mColorInfo += (uint8_t)doc[SL_MEDIUM][SL_GREEN]<< 16;
-        mColorInfo += (uint8_t)doc[SL_MEDIUM][SL_BLUE] << 8;
+        mColorInfo += (uint32_t)doc[SL_MEDIUM][SL_COLOR]  << 8;
         mColorInfo += 2;
 
-        lColorInfo += (uint8_t)doc[SL_LOW][SL_RED]  << 24;
-        lColorInfo += (uint8_t)doc[SL_LOW][SL_GREEN]<< 16;
-        lColorInfo += (uint8_t)doc[SL_LOW][SL_BLUE] << 8;
+        lColorInfo += (uint32_t)doc[SL_LOW][SL_COLOR]  << 8;
         lColorInfo += 3;
 
         s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, hColorInfo);
@@ -213,9 +207,7 @@ void loop() {
         s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, lColorInfo);
       }else if (subscription == &sub_lightColor) {
         uint32_t colorInfo = 0;
-        colorInfo += (uint8_t)doc[SL_RED]   << 24;
-        colorInfo += (uint8_t)doc[SL_GREEN] << 16;
-        colorInfo += (uint8_t)doc[SL_BLUE]  << 8;
+        colorInfo += (uint32_t)doc[SL_COLOR]   << 8;
         s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
       }
       else if (subscription == &sub_lightOffset)
