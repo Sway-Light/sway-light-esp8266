@@ -39,7 +39,7 @@ bool shouldSaveConfig = false;
 SoftwareSerial mySerial(13, 15);
 SwayLight s(mySerial);
 
-StaticJsonDocument<200> doc;
+StaticJsonDocument<300> doc;
 StaticJsonDocument<200> pubDoc;
 
 void serialProcess(void);
@@ -189,27 +189,54 @@ void loop() {
         }
       }else if(subscription == &sub_currMode) {
         s.setMode((int)doc[SL_VALUE]);
-      }else if (subscription == &sub_lightColor || subscription == &sub_musicColor) {
+      }else if (subscription == &sub_musicColor) {
+        uint32_t hColorInfo = 0;
+        uint32_t mColorInfo = 0;
+        uint32_t lColorInfo = 0;
+        hColorInfo += (uint8_t)doc[SL_HIGH][SL_RED]  << 24;
+        hColorInfo += (uint8_t)doc[SL_HIGH][SL_GREEN]<< 16;
+        hColorInfo += (uint8_t)doc[SL_HIGH][SL_BLUE] << 8;
+        hColorInfo += 1;
+
+        mColorInfo += (uint8_t)doc[SL_MEDIUM][SL_RED]  << 24;
+        mColorInfo += (uint8_t)doc[SL_MEDIUM][SL_GREEN]<< 16;
+        mColorInfo += (uint8_t)doc[SL_MEDIUM][SL_BLUE] << 8;
+        mColorInfo += 2;
+
+        lColorInfo += (uint8_t)doc[SL_LOW][SL_RED]  << 24;
+        lColorInfo += (uint8_t)doc[SL_LOW][SL_GREEN]<< 16;
+        lColorInfo += (uint8_t)doc[SL_LOW][SL_BLUE] << 8;
+        lColorInfo += 3;
+
+        s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, hColorInfo);
+        s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, mColorInfo);
+        s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, lColorInfo);
+      }else if (subscription == &sub_lightColor) {
         uint32_t colorInfo = 0;
-        colorInfo += (uint8_t)doc[SL_RED] << 24;
+        colorInfo += (uint8_t)doc[SL_RED]   << 24;
         colorInfo += (uint8_t)doc[SL_GREEN] << 16;
-        colorInfo += (uint8_t)doc[SL_BLUE]  <<  8;
-        colorInfo += (subscription == &sub_lightColor)? (uint8_t)doc[SL_BRIGHT]: (uint8_t)doc[SL_LEV];
-        if(subscription == &sub_lightColor) {
-          s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
-        }else {
-          s.setLedColor(_CONTROL_TYPE::MUSIC, _LED::COLOR, colorInfo);
-        }
-      }else if (subscription == &sub_lightOffset) {
+        colorInfo += (uint8_t)doc[SL_BLUE]  << 8;
+        s.setLedColor(_CONTROL_TYPE::LIGHT, _LED::COLOR, colorInfo);
+      }
+      else if (subscription == &sub_lightOffset)
+      {
         s.setLedOffset(_CONTROL_TYPE::LIGHT, (int)doc[SL_VALUE]);
-      }else if (subscription == &sub_lightZoom) {
+      }
+      else if (subscription == &sub_lightZoom)
+      {
         s.setLedZoom((int)doc[SL_VALUE]);
-      }else if (subscription == &sub_musicOffset) {
+      }
+      else if (subscription == &sub_musicOffset)
+      {
         s.setLedOffset(_CONTROL_TYPE::MUSIC, (int)doc[SL_VALUE]);
-      }else if (subscription == &sub_musicStyle) {
+      }
+      else if (subscription == &sub_musicStyle)
+      {
         s.setLedStyle((int)doc[SL_VALUE]);
-      }else if (subscription == &sub_lightDisplay ||
-                subscription == &sub_musicDisplay) {
+      }
+      else if (subscription == &sub_lightDisplay ||
+               subscription == &sub_musicDisplay)
+      {
         uint8_t mode = _CONTROL_TYPE::LIGHT;
         if (subscription == &sub_musicDisplay) {
           mode = _CONTROL_TYPE::MUSIC;
@@ -219,7 +246,9 @@ void loop() {
           (uint8_t)doc[SL_OFFSET], 
           (uint8_t)doc[SL_ZOOM],
           (uint8_t)doc[SL_BRIGHT]);
-      }else if (subscription == &sub_optionConfig) {
+      }
+      else if (subscription == &sub_optionConfig)
+      {
         s.setOptionConfig((uint8_t)doc[SL_FFT_MAG]);
       }
     }
@@ -390,6 +419,8 @@ void subscribeAllTopics() {
   mqtt.subscribe(&sub_musicOffset);
   mqtt.subscribe(&sub_musicStyle);
   mqtt.subscribe(&sub_musicDisplay);
+
+  mqtt.subscribe(&sub_optionConfig);
 }
 
 void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription) {
