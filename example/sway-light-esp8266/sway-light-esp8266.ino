@@ -14,7 +14,7 @@
 #include "SwayLight_MQTT_topic.h"
 
 /************************* Adafruit.io Setup *********************************/
-#define AIO_SERVER "172.20.10.6"
+#define AIO_SERVER "ENTER MQTT IP"
 #define AIO_SERVERPORT 1883 // use 1883 for SSL
 #define AIO_USERNAME ""
 #define AIO_KEY ""
@@ -55,6 +55,47 @@ void saveConfigCallback () {
   shouldSaveConfig = true;
 }
 
+void setupSpiffs(){
+  //clean FS, for testing
+  // SPIFFS.format();
+
+  //read configuration from FS json
+  Serial.println("mounting FS...");
+
+  if (SPIFFS.begin()) {
+    Serial.println("mounted file system");
+    if (SPIFFS.exists("/config.json")) {
+      //file exists, reading and loading
+      Serial.println("reading config file");
+      File configFile = SPIFFS.open("/config.json", "r");
+      if (configFile) {
+        Serial.println("opened config file");
+        size_t size = configFile.size();
+        // Allocate a buffer to store contents of the file.
+        std::unique_ptr<char[]> buf(new char[size]);
+
+        configFile.readBytes(buf.get(), size);
+        DynamicJsonDocument json(1024);
+        DeserializationError deserializeError = deserializeJson(json, buf.get());
+        serializeJson(json, Serial);
+        if (!deserializeError) {
+          Serial.println("\nparsed json");
+          if(json["mqtt_ip"]) {
+            strcpy(mqtt_ip, json["mqtt_ip"]);
+          }else {
+            Serial.println("no custom ip in config");
+          }
+        } else {
+          Serial.println("failed to load json config");
+        }
+      }
+    }
+  } else {
+    Serial.println("failed to mount FS");
+  }
+  //end read
+}
+
 WiFiManagerParameter custom_mqtt_ip(mqtt_ip, mqtt_ip, AIO_SERVER, 15);
 
 // WiFiManager
@@ -63,7 +104,7 @@ WiFiManager wifiManager;
 
 void setup() {
   Serial.begin(115200);
-
+  setupSpiffs();
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   
@@ -89,16 +130,32 @@ void setup() {
   // if it does not connect it starts an access point with the specified name
   // here  "AutoConnectAP"
   // and goes into a blocking loop awaiting configuration
-  wifiManager.autoConnect("AutoConnectAP");
+  wifiManager.autoConnect("Sway Light");
   // or use this for auto generated name ESP + ChipID
   //wifiManager.autoConnect();
   
   // if you get here you have connected to the WiFi
   Serial.println("Connected!");
-  
-  strcpy(mqtt_ip, custom_mqtt_ip.getValue());
 
   // Initialize the output variables as outputs
+  
+  if (shouldSaveConfig) {
+    strcpy(mqtt_ip, custom_mqtt_ip.getValue());
+    Serial.println("saving config");
+    DynamicJsonDocument json(1024);
+    json["mqtt_ip"] = mqtt_ip;
+
+    File configFile = SPIFFS.open("/config.json", "w");
+    if (!configFile) {
+      Serial.println("failed to open config file for writing");
+    }
+
+    serializeJson(json, Serial);
+    serializeJson(json, configFile);
+    configFile.close();
+    //end save
+    shouldSaveConfig = false;
+  }
   Serial.print("mqtt_ip:");
   Serial.println(mqtt_ip);
   //  server.begin();
@@ -382,12 +439,14 @@ void MQTT_connect() {
   uint8_t retries = 5;
   while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
     Serial.println(mqtt.connectErrorString(ret));
-    Serial.println("Retrying MQTT connection in 2 seconds...");
+    Serial.println("Retrying MQTT connection in 5 seconds...");
     mqtt.disconnect();
-    delay(2000); // wait 2 seconds
+    delay(5000); // wait 2 seconds
     retries--;
     if (retries == 0) {
       wifiManager.resetSettings();
+      WiFi.disconnect();
+      SPIFFS.format();
       // basically die and wait for WDT to reset me
       while (1);
     }
