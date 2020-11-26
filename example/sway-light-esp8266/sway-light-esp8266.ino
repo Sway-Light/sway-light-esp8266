@@ -445,7 +445,7 @@ void MQTT_connect() {
     retries--;
     if (retries == 0) {
       wifiManager.resetSettings();
-      WiFi.disconnect();
+      wifiManager.erase(true);
       SPIFFS.format();
       // basically die and wait for WDT to reset me
       while (1);
