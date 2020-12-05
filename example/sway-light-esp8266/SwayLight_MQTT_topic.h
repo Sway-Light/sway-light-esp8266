@@ -5,6 +5,7 @@
 
 #define CURR_MODE             "status"
 #define POWER                 "power"
+#define INFO                  "info"
 #define OPTION_CONFIG         "option_config"
 
 #define LIGHT_COLOR           "mode/light/color"
@@ -20,6 +21,7 @@
 /********** JSON KEY ***********/
 #define SL_ID                    "id"
 #define SL_VALUE                 "value"
+#define SL_UPDATE_AT             "update_at"
 
 #define SL_RED                   "r"
 #define SL_GREEN                 "g"

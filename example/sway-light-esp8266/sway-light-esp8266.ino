@@ -41,10 +41,14 @@ SwayLight s(mySerial);
 
 StaticJsonDocument<300> doc;
 StaticJsonDocument<200> pubDoc;
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, 28800);
+unsigned long lastHeartBeat = 0;
 
 void serialProcess(void);
-void getNtpTime();
+unsigned long getNtpTime();
 
+void updateLastHeartBeat();
 void MQTT_connect();
 void subscribeAllTopics();
 void printSubscribeInfo(Adafruit_MQTT_Subscribe *subscription);
@@ -159,6 +163,8 @@ void setup() {
   Serial.print("mqtt_ip:");
   Serial.println(mqtt_ip);
   //  server.begin();
+  timeClient.begin();
+  timeClient.update();
   getNtpTime();
 }
 
@@ -198,6 +204,7 @@ Adafruit_MQTT_Publish   pub_lightColor   = Adafruit_MQTT_Publish(&mqtt, MY_DEVIC
 Adafruit_MQTT_Publish   pub_lightZoom    = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_ZOOM, qos);
 Adafruit_MQTT_Publish   pub_lightDisplay = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_DISPLAY, qos);
 Adafruit_MQTT_Publish   pub_musicDisplay = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY, qos);
+Adafruit_MQTT_Publish   pub_deviceInfo   = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC INFO, qos);
 
 void loop() {
   // Ensure the connection to the MQTT server is alive (this will make the first
@@ -301,10 +308,13 @@ void loop() {
         s.setOptionConfig((uint8_t)doc[SL_FFT_MAG]);
       }
     }
+    updateLastHeartBeat();
   }
+
+  updateLastHeartBeat();
   // ping the server to keep the mqtt connection alive
   // NOT required if you are publishing once every KEEPALIVE seconds
-  
+
   // if(! mqtt.ping()) {
   //   mqtt.disconnect();
   //   Serial.println("MQTT Disconnected!");
@@ -395,13 +405,7 @@ void serialProcess() {
   }
 }
 
-void getNtpTime() {
-  WiFiUDP ntpUDP;
-  NTPClient timeClient(ntpUDP, 28800);
-  
-  timeClient.begin();
-  timeClient.update();
-
+unsigned long getNtpTime() {
   unsigned long epochTime = timeClient.getEpochTime();
 
   Serial.print("epochTime: ");
@@ -423,7 +427,22 @@ void getNtpTime() {
                        String(currentSecond);
   s.setDatetime(epochTime);
   Serial.println(currentDate);
- }
+  return epochTime;
+}
+
+void updateLastHeartBeat() {
+  if(millis() - lastHeartBeat > 5000) {
+    Serial.println("update");
+    lastHeartBeat = millis();
+    char pubMsg[200];
+    pubDoc.clear();
+    pubDoc[SL_ID] = CLIENT_ID;
+    pubDoc[SL_UPDATE_AT] = getNtpTime();
+    serializeJson(pubDoc, pubMsg);
+    pub_deviceInfo.publish(pubMsg);
+  }
+}
+
 void MQTT_connect() {
   int8_t ret;
   
