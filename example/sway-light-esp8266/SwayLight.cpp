@@ -85,6 +85,16 @@ void SwayLight::setOptionConfig(uint8_t fftMag) {
   _sendDataToHT32();
 }
 
+void SwayLight::setBtModuleOpcode(String opcode) {
+  _initData();
+  _dataToHT32[1] = _CONTROL_TYPE::BT_MODULE;
+  _dataToHT32[2] = 0x07;
+  _dataToHT32[3] = opcode.charAt(0);
+  _dataToHT32[4] = opcode.charAt(1);
+  _setCheckSum();
+  _sendDataToHT32();
+}
+
 /**********   RECIVE   **********/
 bool SwayLight::isValid(void) {
   uint16_t sum = 0;
@@ -110,6 +120,30 @@ uint8_t SwayLight::getStatus(void) {
 
 uint8_t SwayLight::getLedType(void) {
   return this->dataFromHt32[2];
+}
+
+uint8_t SwayLight::getBtType(void) {
+  return this->dataFromHt32[2];
+}
+
+uint8_t SwayLight::getBtConnect(void) {
+  if(this->dataFromHt32[3] == 0x01) {
+    return true;
+  }else {
+    return false;
+  }
+}
+
+uint8_t SwayLight::getBtIsPlay(void) {
+  if(this->dataFromHt32[3] == 0x01) {
+    return true;
+  }else {
+    return false;
+  }
+}
+
+uint8_t SwayLight::getBtVolume(void) {
+  return this->dataFromHt32[5];
 }
 
 uint8_t SwayLight::getLedParamVal(void) {

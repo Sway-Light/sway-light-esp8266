@@ -18,6 +18,9 @@
 #define MUSIC_STYLE           "mode/music/style"
 #define MUSIC_DISPLAY         "mode/music/display"
 
+#define BT_MODULE_STATUS      "bt_module/status"
+#define BT_MODULE_OPERATION   "bt_module/operation"
+
 /********** JSON KEY ***********/
 #define SL_ID                    "id"
 #define SL_VALUE                 "value"
@@ -40,6 +43,12 @@
 #define SL_SEC                   "sec"
 #define SL_ENABLE                "enable"
 
+// bluetooth module
+#define SL_CONNECT               "cnt"
+#define SL_IS_PLAY               "is_play"
+#define SL_VOLUME                "vol"
+#define SL_OPERATION             "operation"
+
 #define SL_FFT_MAG               "fft_mag"
 
 enum _CONST_BYTE {
@@ -56,7 +65,8 @@ enum _CONTROL_TYPE {
   MODE_SWITCH            = 0x01,
   LIGHT                  = 0x02,
   MUSIC                  = 0x03,
-  SETTING                = 0x04
+  SETTING                = 0x04,
+  BT_MODULE              = 0x05
 };
 enum _LED {
   COLOR                  = 0x01,
@@ -65,6 +75,11 @@ enum _LED {
   ZOOM                   = 0x03,
   STYLE                  = 0x04,
   LED_DISPLAY            = 0x05
+};
+
+enum _BT_MODULE {
+  BT_STATUS = 0x06,
+  BT_OPERATION = 0x07
 };
 
 enum _SETTINGS {

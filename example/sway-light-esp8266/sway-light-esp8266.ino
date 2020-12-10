@@ -195,6 +195,7 @@ Adafruit_MQTT_Subscribe sub_musicColor   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEV
 Adafruit_MQTT_Subscribe sub_musicOffset  = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY_OFFSET);
 Adafruit_MQTT_Subscribe sub_musicStyle   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_STYLE);
 Adafruit_MQTT_Subscribe sub_musicDisplay = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY);
+Adafruit_MQTT_Subscribe sub_btModuleOp   = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC BT_MODULE_OPERATION);
 
 Adafruit_MQTT_Subscribe sub_optionConfig = Adafruit_MQTT_Subscribe(&mqtt, MY_DEVICE_TOPIC OPTION_CONFIG);
 
@@ -204,6 +205,7 @@ Adafruit_MQTT_Publish   pub_lightColor   = Adafruit_MQTT_Publish(&mqtt, MY_DEVIC
 Adafruit_MQTT_Publish   pub_lightZoom    = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_ZOOM, qos);
 Adafruit_MQTT_Publish   pub_lightDisplay = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC LIGHT_DISPLAY, qos);
 Adafruit_MQTT_Publish   pub_musicDisplay = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC MUSIC_DISPLAY, qos);
+Adafruit_MQTT_Publish   pub_btStatus     = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC BT_MODULE_STATUS, qos);
 Adafruit_MQTT_Publish   pub_deviceInfo   = Adafruit_MQTT_Publish(&mqtt, MY_DEVICE_TOPIC INFO, qos);
 
 void loop() {
@@ -303,6 +305,12 @@ void loop() {
           (uint8_t)doc[SL_ZOOM],
           (uint8_t)doc[SL_BRIGHT]);
       }
+      else if (subscription == &sub_btModuleOp) {
+        String code = doc[SL_OPERATION];
+        Serial.print("code:");
+        Serial.println(code);
+        s.setBtModuleOpcode(code);
+      }
       else if (subscription == &sub_optionConfig)
       {
         s.setOptionConfig((uint8_t)doc[SL_FFT_MAG]);
@@ -393,6 +401,15 @@ void serialProcess() {
               pub_musicDisplay.publish(pubMsg);
             }
             break;
+
+          case _CONTROL_TYPE::BT_MODULE:
+            if(s.getBtType() == _BT_MODULE::BT_STATUS) {
+              pubDoc[SL_CONNECT] = s.getBtConnect();
+              pubDoc[SL_IS_PLAY] = s.getBtIsPlay();
+              pubDoc[SL_VOLUME] = s.getBtVolume();
+              serializeJson(pubDoc, pubMsg);
+              pub_btStatus.publish(pubMsg);
+            }
 
           default:
             Serial.println("control type error");
@@ -489,6 +506,7 @@ void subscribeAllTopics() {
   mqtt.subscribe(&sub_musicOffset);
   mqtt.subscribe(&sub_musicStyle);
   mqtt.subscribe(&sub_musicDisplay);
+  mqtt.subscribe(&sub_btModuleOp);
 
   mqtt.subscribe(&sub_optionConfig);
 }

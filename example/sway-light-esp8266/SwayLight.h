@@ -22,6 +22,7 @@ class SwayLight {
     void setLedZoom(uint8_t zoomValue);
     void setLedStyle(uint8_t styleId);
     void setOptionConfig(uint8_t fftMag);
+    void setBtModuleOpcode(String opcode);
     void setLedDisplay(
         uint8_t mode,
         uint8_t offsetValue,
@@ -32,6 +33,12 @@ class SwayLight {
     bool isValid(void);
     uint8_t getControlType(void);
     uint8_t getStatus(void);
+
+    uint8_t getBtType(void);
+    uint8_t getBtConnect(void);
+    uint8_t getBtIsPlay(void);
+    uint8_t getBtVolume(void);
+    
     uint8_t getLedType(void);
     uint8_t getLedParamVal(void);
     uint8_t getRed(void);
