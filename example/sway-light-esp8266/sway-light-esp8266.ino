@@ -390,6 +390,7 @@ void serialProcess() {
               serializeJson(pubDoc, pubMsg);
               pub_lightDisplay.publish(pubMsg);
             }
+            Serial.println(pubMsg);
             break;
 
           case _CONTROL_TYPE::MUSIC:
@@ -400,6 +401,7 @@ void serialProcess() {
               serializeJson(pubDoc, pubMsg);
               pub_musicDisplay.publish(pubMsg);
             }
+            Serial.println(pubMsg);
             break;
 
           case _CONTROL_TYPE::BT_MODULE:
@@ -410,6 +412,8 @@ void serialProcess() {
               serializeJson(pubDoc, pubMsg);
               pub_btStatus.publish(pubMsg);
             }
+            Serial.println(pubMsg);
+            break;
 
           default:
             Serial.println("control type error");

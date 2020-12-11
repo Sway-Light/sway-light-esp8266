@@ -4,7 +4,7 @@
 
 SwayLight::SwayLight(SoftwareSerial& serial) {
   _mcuSerial = &serial;
-  _mcuSerial->begin(9600);
+  _mcuSerial->begin(115200);
   currIndex = 0;
   //  _mcuSerial->println("test msg");
 }
@@ -135,7 +135,7 @@ bool SwayLight::getBtConnect(void) {
 }
 
 bool SwayLight::getBtIsPlay(void) {
-  if(this->dataFromHt32[3] == 0x01) {
+  if(this->dataFromHt32[4] == 0x01) {
     return true;
   }else {
     return false;
