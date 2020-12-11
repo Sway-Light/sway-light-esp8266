@@ -29,14 +29,14 @@ class SwayLight {
         uint8_t zoomValue,
         uint8_t brightnessValue);
 
-    // recive
+    // receive
     bool isValid(void);
     uint8_t getControlType(void);
     uint8_t getStatus(void);
 
     uint8_t getBtType(void);
-    uint8_t getBtConnect(void);
-    uint8_t getBtIsPlay(void);
+    bool getBtConnect(void);
+    bool getBtIsPlay(void);
     uint8_t getBtVolume(void);
     
     uint8_t getLedType(void);

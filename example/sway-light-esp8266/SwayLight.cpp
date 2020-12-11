@@ -126,7 +126,7 @@ uint8_t SwayLight::getBtType(void) {
   return this->dataFromHt32[2];
 }
 
-uint8_t SwayLight::getBtConnect(void) {
+bool SwayLight::getBtConnect(void) {
   if(this->dataFromHt32[3] == 0x01) {
     return true;
   }else {
@@ -134,7 +134,7 @@ uint8_t SwayLight::getBtConnect(void) {
   }
 }
 
-uint8_t SwayLight::getBtIsPlay(void) {
+bool SwayLight::getBtIsPlay(void) {
   if(this->dataFromHt32[3] == 0x01) {
     return true;
   }else {
